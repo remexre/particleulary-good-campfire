@@ -1,12 +1,16 @@
-open Tgl4
+open Tgl3
 
 let () =
-  (* Initialize GLFW. *)
-  GLFW.init ();
-  at_exit GLFW.terminate;
+  Window.with_window (fun window ->
+      Printf.printf "OpenGL driver from %s\n"
+        (Option.get (Gl.get_string Gl.vendor));
+      Window.loop ~window (fun dt events ->
+          (* TODO: Actually handle input events! For now, we just print how many there were. *)
+          let l = List.length events in
+          if l > 0 then Printf.printf "%d events\n%!" l;
 
-  let window = GLFW.createWindow 640 480 "Hello World" () in
-  GLFW.makeContextCurrent ~window:(Some window);
+          (* TODO: Physics update *)
+          let _ = dt in
 
-  print_endline "Hello, World!";
-  print_endline (Option.get (Gl.get_string Gl.vendor))
+          (* TODO: Have some sorta world that gets passed into the renderer. *)
+          Render.render ()))
