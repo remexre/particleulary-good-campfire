@@ -1,0 +1,6 @@
+.direnv/
+_build/
+/result
+
+*.install
+*.opam
