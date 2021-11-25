@@ -4,6 +4,8 @@ A particle-system-based campfire simulation.
 
 ## Building
 
+Either of the following sets of directions can be used.
+
 ### With Dune
 
 Have OPAM installed.
