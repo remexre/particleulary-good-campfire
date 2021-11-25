@@ -12,7 +12,7 @@ Have OPAM installed.
 ```
 $ sudo apt update
 $ sudo apt install libffi-dev libglfw3-dev pkg-config
-$ opam install glfw-ocaml tgls
+$ opam install glfw-ocaml imagelib tgls
 $ dune build
 $ ./_build/install/default/bin/particleulary-good-campfire
 ```

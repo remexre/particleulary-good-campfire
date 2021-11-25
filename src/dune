@@ -1,4 +1,4 @@
 (executable
  (name main)
  (public_name particleulary-good-campfire)
- (libraries glfw-ocaml tgls.tgl3))
+ (libraries glfw-ocaml imagelib imagelib.unix tgls.tgl3))

@@ -1,9 +1,11 @@
 open Tgl3
 
-let () =
+let main () : unit =
   Window.with_window (fun window ->
       Printf.printf "OpenGL driver from %s\n"
         (Option.get (Gl.get_string Gl.vendor));
+
+      let render_state = Render.init () in
       Window.loop ~window (fun dt events ->
           (* TODO: Actually handle input events! For now, we just print how many there were. *)
           let l = List.length events in
@@ -12,5 +14,6 @@ let () =
           (* TODO: Physics update *)
           let _ = dt in
 
-          (* TODO: Have some sorta world that gets passed into the renderer. *)
-          Render.render ()))
+          Render.render render_state))
+
+let () = main ()

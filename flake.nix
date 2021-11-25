@@ -9,7 +9,13 @@
       let pkgs = nixpkgs.legacyPackages.${system};
       in rec {
         defaultPackage = packages.particleulary-good-campfire;
-        devShell = pkgs.mkShell { inputsFrom = [ defaultPackage ]; };
+        devShell = pkgs.mkShell {
+          inputsFrom = [ defaultPackage ];
+          buildInputs = [
+            pkgs.inotify-tools # For `dune build -w'.
+            pkgs.ocamlPackages.utop
+          ];
+        };
         packages = {
           glfw-ocaml = pkgs.ocamlPackages.buildDunePackage rec {
             pname = "glfw-ocaml";
@@ -36,7 +42,11 @@
             minimalOCamlVersion = "4.12";
             src = ./.;
 
-            buildInputs = [ packages.glfw-ocaml packages.tgls ];
+            buildInputs =
+              [ packages.glfw-ocaml packages.tgls pkgs.ocamlPackages.imagelib ];
+            postInstall = ''
+              cp -r assets $out/assets
+            '';
           };
           tgls = pkgs.stdenv.mkDerivation rec {
             pname = "tgls";
