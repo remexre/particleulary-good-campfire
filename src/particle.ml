@@ -1,6 +1,8 @@
 open Assets
 open Tgl3
 
+open Random
+
 module Particle = struct
 
   type pair = {mutable x:float; mutable y:float}
@@ -13,9 +15,17 @@ module Particle = struct
     mutable texture:Texture.t;
   }
 
-  let apply_force_to_particle (p : particle) ((f1, f2) : float * float) =
-    p.acc.x <- p.acc.x +. f1;
-    p.acc.y <- p.acc.y +. f2
+  let init (p : pair) (t : Texture.t) =
+    let np = { pos = {x = p.x; y = p.y};
+               vel = {x = (Random.float 10.0) *. 0.3; y = (Random.float 10.0) *. 0.3};
+               acc = {x = 0.0; y = 0.0};
+               age = 0.0;
+               texture = t}
+    in np
+
+  let apply_force_to_particle (p : particle) (f : pair) =
+    p.acc.x <- p.acc.x +. f.x;
+    p.acc.y <- p.acc.y +. f.y
 
   let update (p : particle) =
     (*update velocity*)
@@ -29,6 +39,8 @@ module Particle = struct
     (*reset acceleration*)
     p.acc.x <- 0.0;
     p.acc.y <- 0.0
+
+  let animate (p : particle) = update p
 
   (*TO DO: render an individual particle*)
 
