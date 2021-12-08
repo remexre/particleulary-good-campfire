@@ -23,6 +23,12 @@ module type Asset = sig
 
   val load : string -> t
 
+  val to_string : t -> string
+end
+
+module type OpenGLResource = sig
+  type t
+
   val get_handle : t -> int
 
   val to_string : t -> string
@@ -36,6 +42,8 @@ module Shader (Kind : sig
   val ext : string
 end) : sig
   include Asset
+
+  include OpenGLResource with type t := t
 
   exception Failed_to_compile_shader of string * string
 end = struct
@@ -98,6 +106,8 @@ end)
 module Program : sig
   include Asset
 
+  include OpenGLResource with type t := t
+
   exception Failed_to_link_shader_program of string * string * string
 
   val link : VertexShader.t -> FragmentShader.t -> t
@@ -151,7 +161,11 @@ end = struct
     link vert frag
 end
 
-module Texture : Asset = struct
+module Texture : sig
+  include Asset
+
+  include OpenGLResource with type t := t
+end = struct
   type t = string * int
 
   let to_string (name, handle) : string =
@@ -189,4 +203,52 @@ module Texture : Asset = struct
         Glutil.set_int (Gl.delete_textures 1) (get_handle texture))
       out;
     out
+end
+
+module Buffer : sig
+  include OpenGLResource
+
+  type float_array =
+    (float, Bigarray.float32_elt, Bigarray.c_layout) Bigarray.Array1.t
+
+  val make_uninit : kind:string -> name:string -> usage:Gl.enum -> size:int -> t
+
+  val make_static_vbo : name:string -> data:float_array -> t
+end = struct
+  type t = {
+    kind : string;
+    name : string;
+    usage : Gl.enum;
+    size : int;
+    handle : int;
+  }
+
+  type float_array =
+    (float, Bigarray.float32_elt, Bigarray.c_layout) Bigarray.Array1.t
+
+  let to_string { kind; name; handle; _ } : string =
+    Printf.sprintf "<%s buffer %d (%s)>" kind handle name
+
+  let get_handle { handle; _ } : int = handle
+
+  let make_uninit ~(kind : string) ~(name : string) ~(usage : Gl.enum)
+      ~(size : int) : t =
+    let handle = Glutil.get_int (Gl.gen_buffers 1) in
+    Gl.bind_buffer Gl.array_buffer handle;
+    Gl.buffer_data Gl.array_buffer size None usage;
+
+    let out = { kind; name; usage; size; handle } in
+    Gc.finalise
+      (fun buffer ->
+        Printf.eprintf "freeing %s\n" (to_string buffer);
+        Glutil.set_int (Gl.delete_buffers 1) (get_handle buffer))
+      out;
+    out
+
+  let make_static_vbo ~(name : string) ~(data : float_array) : t =
+    let size = Bigarray.Array1.dim data in
+    let buffer = make_uninit ~kind:"vertex" ~name ~usage:Gl.static_draw ~size in
+    Gl.bind_buffer Gl.array_buffer (get_handle buffer);
+    Gl.buffer_data Gl.array_buffer size (Some data) Gl.static_draw;
+    buffer
 end
