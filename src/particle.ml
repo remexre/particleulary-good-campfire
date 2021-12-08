@@ -1,42 +1,32 @@
-open Assets
-open Tgl3
-
-open Random
-
-type pair = {mutable x:float; mutable y:float}
-
 type particle = {
-  mutable pos:pair;
-  mutable vel:pair;
-  mutable acc:pair;
+  mutable pos: (float * float);
+  mutable vel: (float * float);
+  mutable acc: (float * float);
   mutable age:float;
-  mutable texture:Texture.t;
 }
 
-let init (p : pair) (t : Texture.t) =
-  let np = { pos = {x = p.x; y = p.y};
-             vel = {x = (Random.float 10.0) *. 0.3; y = (Random.float 10.0) *. 0.3};
-             acc = {x = 0.0; y = 0.0};
-             age = 0.0;
-             texture = t}
+let init (p : (float * float)) =
+  let np = { pos = p;
+             vel = ((Random.float 10.0) *. 0.3, (Random.float 10.0) *. 0.3);
+             acc = (0.0, 0.0);
+             age = 0.0}
   in np
 
-let apply_force_to_particle (p : particle) (f : pair) =
-  p.acc.x <- p.acc.x +. f.x;
-  p.acc.y <- p.acc.y +. f.y
+let apply_force_to_particle (p : particle) (f : (float * float)) =
+  let (x, y) = p.acc in
+    let (f1, f2) = f in
+      p.acc <- (x +. f1, y +. f2)
 
 let update (p : particle) =
-  (*update velocity*)
-  p.vel.x <- p.vel.x +. p.acc.x;
-  p.vel.y <- p.vel.y +. p.acc.y;
-  (*update position*)
-  p.pos.x <- p.pos.x +. p.vel.x;
-  p.pos.y <- p.pos.y +. p.vel.y;
-  (*update age*)
-  p.age <- p.age +. 2.0;
-  (*reset acceleration*)
-  p.acc.x <- 0.0;
-  p.acc.y <- 0.0
+  (*update position & velocity*)
+  let (vx, vy) = p.vel in
+    let (ax, ay) = p.acc in
+      let (px, py) = p.pos in
+        p.pos <- (px +. (vx +. ax), py +. (vy +. ay));
+        (*update age*)
+        p.age <- p.age +. 2.0;
+        (*reset acceleration*)
+        p.acc <- (0.0, 0.0)
 
 let animate (p : particle) = update p
 

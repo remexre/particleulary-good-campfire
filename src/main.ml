@@ -6,14 +6,15 @@ let main () : unit =
         (Option.get (Gl.get_string Gl.vendor));
 
       let render_state = Render.init () in
-      Window.loop ~window (fun dt events ->
-          (* TODO: Actually handle input events! For now, we just print how many there were. *)
-          let l = List.length events in
-          if l > 0 then Printf.printf "%d events\n%!" l;
+      let ps = Particle_system.init 5 (1.0, 1.0) in
+        Window.loop ~window (fun dt events ->
+            (* TODO: Actually handle input events! For now, we just print how many there were. *)
+            let l = List.length events in
+            if l > 0 then Printf.printf "%d events\n%!" l;
 
-          (* TODO: Physics update *)
-          let _ = dt in
+            (* TODO: Physics update *)
+            let _ = dt in
 
-          Render.render render_state))
+            Render.render render_state))
 
 let () = main ()
