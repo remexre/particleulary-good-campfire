@@ -1,5 +1,5 @@
-type t
+type scene
 
-val init : unit -> t
+val init_scene : Particle_system.particle_system -> scene
 
-val render : t -> unit
+val render : scene -> unit
