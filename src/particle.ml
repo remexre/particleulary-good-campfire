@@ -22,11 +22,13 @@ let update (p : particle) =
   let (vx, vy, vz) = p.vel in
     let (ax, ay, az) = p.acc in
       let (px, py, pz) = p.pos in
-        p.pos <- (px +. (vx +. ax), py +. (vy +. ay), pz +. (vz +. az));
-        (*update age*)
-        p.age <- p.age +. 2.0;
-        (*reset acceleration*)
-        p.acc <- (0.0, 0.0, 0.0)
+        p.vel <- (vx +. ax, vy +. ay, vz +.az);
+        let (vnx, vny, vnz) = p.vel in
+          p.pos <- (px +. vnx, py +. vny, pz +. vnz);
+          (*update age*)
+          p.age <- p.age +. 2.0;
+          (*reset acceleration*)
+          p.acc <- (0.0, 0.0, 0.0)
 
 let animate (p : particle) = update p
 
