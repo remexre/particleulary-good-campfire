@@ -42,6 +42,7 @@
             useDune2 = true;
             minimalOCamlVersion = "4.12";
             src = ./.;
+            doCheck = true;
 
             buildInputs =
               [ packages.glfw-ocaml packages.tgls pkgs.ocamlPackages.imagelib ];
