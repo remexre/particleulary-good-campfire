@@ -14,11 +14,15 @@ let main () : unit =
 
           (* TODO: Physics update *)
           let _ = dt in
-            let dir = (0.5, 1.0, 0.0) in
-              Particle_system.apply_force_to_all_particles particle_system dir;
-              Particle_system.animate particle_system;
-              Particle_system.add_particles particle_system 2;
-              
-              Render.render scene))
+          let dir = (0.5, 1.0, 0.0) in
+          Particle_system.apply_force_to_all_particles particle_system dir;
+          Particle_system.animate particle_system;
+          Particle_system.add_particles particle_system 2;
 
-let () = main ()
+          Render.render scene))
+
+let () =
+  Obj_loader.load_file "assets/trees.obj";
+  Obj_loader.load_file "assets/Pine4m/_.obj/Pine_4m.obj"
+
+(* let () = main () *)

@@ -1,0 +1,8 @@
+(executable
+ (name main)
+ (libraries particleulary_good_campfire))
+
+(rule
+ (alias runtest)
+ (action
+  (run ./main.exe)))

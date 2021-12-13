@@ -5,8 +5,9 @@ link here where I retrieved each one.
 
 ## Trees
 
-* trees.obj
+* trees.obj / trees.mtl
   * https://www.cgtrader.com/free-3d-models/plant/conifer/free-trees-pack-low-poly
+  * Patched for case-sensitive filesystems
 * Pine4m
   * https://www.cgtrader.com/free-3d-models/plant/conifer/free-pine-trees-sample-model-6ce9f61e2ff2bc4b922aeda874e96d5b
 
