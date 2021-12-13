@@ -21,8 +21,4 @@ let main () : unit =
 
           Render.render scene))
 
-let () =
-  Obj_loader.load_file "assets/trees.obj";
-  Obj_loader.load_file "assets/Pine4m/_.obj/Pine_4m.obj"
-
-(* let () = main () *)
+let () = main ()
