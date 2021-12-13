@@ -56,4 +56,14 @@ module Buffer : sig
     kind:string -> name:string -> usage:Tgl3.Gl.enum -> size:int -> t
 
   val make_static_vbo : name:string -> data:float_array -> t
+
+  val length : t -> int
+end
+
+module VAO : sig
+  include OpenGLResource
+
+  val make : unit -> t
+
+  val bind : t -> unit
 end

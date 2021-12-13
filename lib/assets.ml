@@ -214,6 +214,8 @@ module Buffer : sig
   val make_uninit : kind:string -> name:string -> usage:Gl.enum -> size:int -> t
 
   val make_static_vbo : name:string -> data:float_array -> t
+
+  val length : t -> int
 end = struct
   type t = {
     kind : string;
@@ -247,8 +249,38 @@ end = struct
 
   let make_static_vbo ~(name : string) ~(data : float_array) : t =
     let size = Bigarray.Array1.dim data in
+    Printf.printf "VBO data is %d floats\n" size;
     let buffer = make_uninit ~kind:"vertex" ~name ~usage:Gl.static_draw ~size in
     Gl.bind_buffer Gl.array_buffer (get_handle buffer);
     Gl.buffer_data Gl.array_buffer size (Some data) Gl.static_draw;
     buffer
+
+  let length { size; _ } = size
+end
+
+module VAO : sig
+  include OpenGLResource
+
+  val make : unit -> t
+
+  val bind : t -> unit
+end = struct
+  type t = { handle : int }
+
+  let to_string { handle } : string = Printf.sprintf "<VAO %d>" handle
+
+  let get_handle { handle } : int = handle
+
+  let make () : t =
+    let handle = Glutil.get_int (Gl.gen_vertex_arrays 1) in
+
+    let out = { handle } in
+    Gc.finalise
+      (fun vao ->
+        Printf.eprintf "freeing %s\n" (to_string vao);
+        Glutil.set_int (Gl.delete_vertex_arrays 1) (get_handle vao))
+      out;
+    out
+
+  let bind { handle } = Gl.bind_vertex_array handle
 end
