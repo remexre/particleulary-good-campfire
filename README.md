@@ -25,5 +25,5 @@ Have Nix 2.4+ installed, with the `nix-command` feature enabled.
 
 ```
 $ nix build
-$ ls ./result/bin/particleulary-good-campfire
+$ ./result/bin/particleulary-good-campfire
 ```

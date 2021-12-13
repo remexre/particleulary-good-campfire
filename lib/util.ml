@@ -14,6 +14,10 @@ let do_iter (n : int) (f : int -> unit) : unit =
 
 let failf fmt = Printf.ksprintf failwith fmt
 
+let flip f x y = f y x
+
+let id x = x
+
 let rec mapM_option f = function
   | [] -> Some []
   | hd :: tl ->
