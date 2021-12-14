@@ -1,5 +1,5 @@
 (executable
  (name main)
  (public_name particleulary-good-campfire)
- (libraries glfw-ocaml particleulary_good_campfire tgls.tgl3)
+ (libraries particleulary_good_campfire tgls.tgl3)
  (modes native))

@@ -1,4 +1,4 @@
 (library
  (public_name particleulary_good_campfire)
- (libraries imagelib imagelib.unix tgls.tgl3)
+ (libraries glfw-ocaml imagelib imagelib.unix tgls.tgl3)
  (wrapped false))
