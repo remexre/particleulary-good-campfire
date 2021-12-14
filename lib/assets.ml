@@ -248,8 +248,7 @@ end = struct
     out
 
   let make_static_vbo ~(name : string) ~(data : float_array) : t =
-    let size = Bigarray.Array1.dim data in
-    Printf.printf "VBO data is %d floats\n" size;
+    let size = 4 * Bigarray.Array1.dim data in
     let buffer = make_uninit ~kind:"vertex" ~name ~usage:Gl.static_draw ~size in
     Gl.bind_buffer Gl.array_buffer (get_handle buffer);
     Gl.buffer_data Gl.array_buffer size (Some data) Gl.static_draw;

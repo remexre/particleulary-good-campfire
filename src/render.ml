@@ -21,8 +21,8 @@ let init_scene (particle_system : Particle_system.particle_system) : scene =
   let example_obj =
     {
       program = debug_program;
-      vbo = Obj_loader.load_file ~path:"assets/sphere.obj";
-      model_matrix = Mat4.identity;
+      vbo = Obj_loader.load_file ~path:"assets/campfire/OBJ/Campfire.obj";
+      model_matrix = Mat4.scale_uniform (1.0 /. 30.0);
     }
   in
   {
@@ -32,7 +32,9 @@ let init_scene (particle_system : Particle_system.particle_system) : scene =
     particle_system;
     opaque_objects = [| example_obj |];
     view_matrix = Mat4.identity;
-    proj_matrix = Mat4.identity;
+    proj_matrix =
+      Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.1
+        ~far:1000.0;
   }
 
 let bind_matrix (program : Program.t) (name : string) : Mat4.t -> unit =
@@ -68,8 +70,7 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
   enable_attrib renderable.program "texCoords" ~offset:24 ~count:2 ~stride;
 
   (* Draw the model! *)
-  Printf.printf "%d\n" (Buffer.length renderable.vbo / 8);
-  Gl.draw_arrays Gl.triangles 0 (Buffer.length renderable.vbo / 8);
+  Gl.draw_arrays Gl.triangles 0 (Buffer.length renderable.vbo / 32);
 
   (* Disable the attributes. *)
   disable_attrib renderable.program "msPosition";
