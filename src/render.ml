@@ -45,7 +45,6 @@ let bind_matrix (program : Program.t) (name : string) : Mat4.t -> unit =
 let enable_attrib (program : Program.t) (name : string) ~(offset : int)
     ~(count : int) ~(stride : int) : unit =
   let index = Gl.get_attrib_location (Program.get_handle program) name in
-  Printf.printf "location of %S = %d\n" name index;
   Gl.enable_vertex_attrib_array index;
   Gl.vertex_attrib_pointer index count Gl.float false stride (`Offset offset)
 
