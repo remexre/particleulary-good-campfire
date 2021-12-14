@@ -13,6 +13,14 @@ val ( * ) : t -> t -> t
 
 val perspective : fovy:float -> aspect:float -> near:float -> far:float -> t
 
+val rotate_pitch : float -> t
+
+val rotate_yaw : float -> t
+
+val rotate_roll : float -> t
+
+val rotate_euler : pitch:float -> yaw:float -> roll:float -> t
+
 val scale : x:float -> y:float -> z:float -> t
 
 val scale_uniform : float -> t

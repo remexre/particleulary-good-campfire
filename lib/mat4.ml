@@ -43,6 +43,30 @@ let perspective ~fovy ~aspect ~near ~far =
     (0.0, 0.0, -.(far +. near) /. (far -. near), -1.0),
     (0.0, 0.0, -.(2.0 *. far *. near /. (far -. near)), 0.0) )
 
+let rotate_pitch angle =
+  let s = Float.sin angle and c = Float.cos angle in
+  ( (1.0, 0.0, 0.0, 0.0),
+    (0.0, c, s, 0.0),
+    (0.0, -.s, c, 0.0),
+    (0.0, 0.0, 0.0, 1.0) )
+
+let rotate_yaw angle =
+  let s = Float.sin angle and c = Float.cos angle in
+  ( (c, 0.0, -.s, 0.0),
+    (0.0, 1.0, 0.0, 0.0),
+    (s, 0.0, c, 0.0),
+    (0.0, 0.0, 0.0, 1.0) )
+
+let rotate_roll angle =
+  let s = Float.sin angle and c = Float.cos angle in
+  ( (c, s, 0.0, 0.0),
+    (-.s, c, 0.0, 0.0),
+    (0.0, 0.0, 1.0, 0.0),
+    (0.0, 0.0, 0.0, 1.0) )
+
+let rotate_euler ~pitch ~yaw ~roll =
+  rotate_roll roll * rotate_yaw yaw * rotate_pitch pitch
+
 let translate ~(x : float) ~(y : float) ~(z : float) : t =
   ( (1.0, 0.0, 0.0, 0.0),
     (0.0, 1.0, 0.0, 0.0),

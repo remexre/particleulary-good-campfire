@@ -78,6 +78,7 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
   disable_attrib renderable.program "texCoords"
 
 let render (scene : scene) : unit =
+  scene.view_matrix <- Mat4.(rotate_roll 0.025 * scene.view_matrix);
   VAO.bind scene.vao;
   Gl.clear_color 0.0 0.0 0.0 1.0;
   Gl.clear_depth 0.0;
