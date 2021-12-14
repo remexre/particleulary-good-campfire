@@ -21,8 +21,8 @@ let init_scene (particle_system : Particle_system.particle_system) : scene =
   let example_obj =
     {
       program = debug_program;
-      vbo = Obj_loader.load_file ~path:"assets/campfire/OBJ/Campfire.obj";
-      model_matrix = Mat4.scale_uniform (1.0 /. 30.0);
+      vbo = Obj_loader.load_file ~path:"assets/sphere.obj";
+      model_matrix = Mat4.identity;
     }
   in
   {

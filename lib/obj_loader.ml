@@ -125,7 +125,6 @@ type face_with_optional_normals = {
 let rec split_to_tris :
     face_elem_with_optional_normals list -> face_with_optional_normals list =
   function
-  | [] | [ _ ] | [ _; _ ] -> failwith "invalid face"
   | [ v1; v2; v3 ] ->
       let texcoords =
         match (v1.texcoord, v2.texcoord, v3.texcoord) with
@@ -143,8 +142,9 @@ let rec split_to_tris :
           normals;
         };
       ]
-  | v1 :: v2 :: v3 :: vs ->
-      split_to_tris [ v1; v2; v3 ] @ split_to_tris (v2 :: v3 :: vs)
+  | [ v1; v2; v3; v4 ] ->
+      split_to_tris [ v1; v2; v3 ] @ split_to_tris [ v3; v4; v1 ]
+  | l -> failf "invalid face (%d sides)" (List.length l)
 
 type face_with_optional_texcoords = {
   positions : Vec3.t * Vec3.t * Vec3.t;
