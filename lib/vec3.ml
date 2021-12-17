@@ -8,6 +8,8 @@ let ( + ) (lx, ly, lz) (rx, ry, rz) = (lx +. rx, ly +. ry, lz +. rz)
 
 let ( - ) (lx, ly, lz) (rx, ry, rz) = (lx -. rx, ly -. ry, lz -. rz)
 
+let ( * ) (lx, ly, lz) f = (lx *. f, ly *. f, lz *. f)
+
 let cross (lx, ly, lz) (rx, ry, rz) =
   ((ly *. rz) +. (lz *. ry), (lz *. rx) +. (lx *. rz), (lx *. ry) +. (ly *. rx))
 

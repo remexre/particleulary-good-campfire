@@ -6,6 +6,8 @@ val ( + ) : t -> t -> t
 
 val ( - ) : t -> t -> t
 
+val ( * ) : t -> float -> t
+
 val cross : t -> t -> t
 
 val dot : t -> t -> float

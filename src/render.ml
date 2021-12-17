@@ -15,11 +15,11 @@ type scene = {
   debug_texture : Texture.t;
   particle_system : Particle_system.particle_system;
   mutable opaque_objects : renderable array;
-  mutable view_matrix : Mat4.t;
+  mutable camera : Camera.t;
   mutable proj_matrix : Mat4.t;
 }
 
-let init_scene (particle_system : Particle_system.particle_system) : scene =
+let init_scene (particle_system : Particle_system.particle_system) (camera : Camera.t) : scene =
   let vert_default = VertexShader.load "shaders/default" in
   let _frag_debug = FragmentShader.load "shaders/debug" in
   let frag_tex_no_lighting = FragmentShader.load "shaders/tex_no_lighting" in
@@ -39,7 +39,7 @@ let init_scene (particle_system : Particle_system.particle_system) : scene =
     debug_texture = Texture.load "debug";
     particle_system;
     opaque_objects = [| example_obj |];
-    view_matrix = Mat4.identity;
+    camera;
     proj_matrix =
       Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.1
         ~far:1000.0;
@@ -98,5 +98,5 @@ let render (scene : scene) : unit =
   Gl.clear (Int.logor Gl.color_buffer_bit Gl.depth_buffer_bit);
   Array.iter
     (fun renderable ->
-      render_one renderable scene.view_matrix scene.proj_matrix)
+      render_one renderable (Camera.view scene.camera) scene.proj_matrix)
     scene.opaque_objects
