@@ -9,6 +9,10 @@ type face_indices = {
 type vec2 = float * float
 
 type obj_directive =
+  | Object of string
+  | Group of string
+  | MTLLib of string
+  | UseMTL of string
   | Position of Vec3.t
   | Texcoord of vec2
   | Normal of Vec3.t
@@ -52,7 +56,10 @@ let parse_obj_directive line =
           Some
             (Normal (Float.of_string x, Float.of_string y, Float.of_string z))
       | [ "vt"; s; t ] -> Some (Texcoord (Float.of_string s, Float.of_string t))
-      | ("g" | "o" | "mtllib" | "usemtl") :: _ -> None
+      | [ "g"; name ] -> Some (Group name)
+      | [ "o"; name ] -> Some (Object name)
+      | [ "mtllib"; name ] -> Some (MTLLib name)
+      | [ "usemtl"; name ] -> Some (UseMTL name)
       | _ -> failf "Unknown OBJ directive %S" line
     with exc ->
       failf "Failed to parse OBJ directive %S: %s" line (Printexc.to_string exc)
