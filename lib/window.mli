@@ -1,4 +1,4 @@
-type event = Key of GLFW.key * GLFW.key_action
+type event = CursorPos of float * float | Key of GLFW.key * GLFW.key_action
 
 type t
 

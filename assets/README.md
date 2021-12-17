@@ -13,7 +13,7 @@ link here where I retrieved each one.
 
 ## Other
 
-* mushrooms.obj
+* mushrooms.obj / mushrooms.mtl
   * https://www.cgtrader.com/free-3d-models/plant/other/low-poly-small-mushrooms-set
 * campfire
   * https://www.cgtrader.com/free-3d-models/exterior/landscape/campfire-03629b01-7d0f-45fc-8466-ff748e13732e

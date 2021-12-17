@@ -35,11 +35,13 @@ let init (pos : Vec3.t) =
     }
 
 let process_input (c : t) (input : Window.event) (dt : float) =
-  let Key(key, action) = input in
-  let c_cfcu = Vec3.normalize (Vec3.cross c.camera_front c.camera_up) in
-  let speed = c.camera_speed *. dt in
-    match key with
-      GLFW.W -> c.camera_pos <- Vec3.(c.camera_pos + (c.camera_front * speed))
+  match input with
+  | CursorPos (_x, _y) -> failwith "TODO"
+  | Key (key, _) -> (
+      let c_cfcu = Vec3.normalize (Vec3.cross c.camera_front c.camera_up) in
+      let speed = c.camera_speed *. dt in
+      match key with
+      | GLFW.W -> c.camera_pos <- Vec3.(c.camera_pos + (c.camera_front * speed))
       | GLFW.A -> c.camera_pos <- Vec3.(c.camera_pos - (c.camera_front * speed))
       | GLFW.S -> c.camera_pos <- Vec3.(c.camera_pos - (c_cfcu * speed))
       | GLFW.D -> c.camera_pos <- Vec3.(c.camera_pos + (c_cfcu * speed))
@@ -47,4 +49,4 @@ let process_input (c : t) (input : Window.event) (dt : float) =
                               GLFW.Press -> c.camera_speed <- c.camera_speed *. 2.0
                               | GLFW.Release -> c.camera_speed <- c.camera_speed *. 0.5
                               | _ -> ())
-      | _ -> ()
+      | _ -> ())

@@ -1,4 +1,4 @@
-type event = Key of GLFW.key * GLFW.key_action
+type event = CursorPos of float * float | Key of GLFW.key * GLFW.key_action
 
 type t = GLFW.window * event Queue.t
 
@@ -39,10 +39,12 @@ let make_window () : t =
 
   (* Create the event queue and register callbacks to push events to it. *)
   let events = Queue.create () in
-  let _ =
-    GLFW.setKeyCallback ~window
-      ~f:(Some (fun _ key _ action _ -> Queue.push (Key (key, action)) events))
-  in
+  ignore
+    (GLFW.setCursorPosCallback ~window
+       ~f:(Some (fun _ x y -> Queue.push (CursorPos (x, y)) events)));
+  ignore
+    (GLFW.setKeyCallback ~window
+       ~f:(Some (fun _ key _ action _ -> Queue.push (Key (key, action)) events)));
 
   (* Return the window and queue. *)
   (window, events)
