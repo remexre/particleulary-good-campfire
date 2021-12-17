@@ -10,6 +10,7 @@ let main () : unit =
       let scene = Render.init_scene particle_system camera in
       Window.loop ~window (fun dt events ->
           (* TODO: Actually handle input events! For now, we just print how many there were. *)
+          List.iter (fun e -> Camera.process_input camera e dt) events;
           let l = List.length events in
           if l > 0 then Printf.printf "%d events\n%!" l;
 

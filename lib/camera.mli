@@ -11,4 +11,4 @@ val view : t -> Mat4.t
 
 val init : Vec3.t -> t
 
-val process_input : t -> Window.event -> unit
+val process_input : t -> Window.event -> float -> unit

@@ -27,7 +27,7 @@ let init (pos : Vec3.t) =
   let cu = Vec3.cross cd cr in
   let cf = (0.0, 0.0, 0.0-.1.0) in
     {camera_pos = pos;
-    camera_speed = 0.05;
+    camera_speed = 0.5;
     camera_direction = cd;
     camera_right = cr;
     camera_up = cu;
@@ -36,12 +36,13 @@ let init (pos : Vec3.t) =
 
 (* let camera_pos = (0.0, 0.0, 0.3) *)
 
-let process_input (c : t) (input : Window.event) =
+let process_input (c : t) (input : Window.event) (dt : float) =
   let Key(key, _) = input in
   let c_cfcu = Vec3.normalize (Vec3.cross c.camera_front c.camera_up) in
+  let speed = c.camera_speed *. dt in
     match key with
-      GLFW.W -> c.camera_pos <- Vec3.(c.camera_pos + (c.camera_front * c.camera_speed))
-    | GLFW.A -> c.camera_pos <- Vec3.(c.camera_pos - (c.camera_front * c.camera_speed))
-    | GLFW.S -> c.camera_pos <- Vec3.(c.camera_pos - (c_cfcu * c.camera_speed))
-    | GLFW.D -> c.camera_pos <- Vec3.(c.camera_pos + (c_cfcu * c.camera_speed))
+      GLFW.W -> c.camera_pos <- Vec3.(c.camera_pos + (c.camera_front * speed))
+    | GLFW.A -> c.camera_pos <- Vec3.(c.camera_pos - (c.camera_front * speed))
+    | GLFW.S -> c.camera_pos <- Vec3.(c.camera_pos - (c_cfcu * speed))
+    | GLFW.D -> c.camera_pos <- Vec3.(c.camera_pos + (c_cfcu * speed))
     | _ -> ()
