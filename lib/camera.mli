@@ -1,6 +1,6 @@
 type t = {
   mutable camera_pos : Vec3.t;
-  camera_speed : float;
+  mutable camera_speed : float;
   camera_direction : Vec3.t;
   camera_right : Vec3.t;
   camera_up : Vec3.t;

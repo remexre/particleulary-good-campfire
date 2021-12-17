@@ -1,6 +1,6 @@
 type t = {
   mutable camera_pos : Vec3.t;
-  camera_speed : float;
+  mutable camera_speed : float;
   camera_direction : Vec3.t;
   camera_right : Vec3.t;
   camera_up : Vec3.t;
@@ -34,15 +34,17 @@ let init (pos : Vec3.t) =
     camera_front = cf;
     }
 
-(* let camera_pos = (0.0, 0.0, 0.3) *)
-
 let process_input (c : t) (input : Window.event) (dt : float) =
-  let Key(key, _) = input in
+  let Key(key, action) = input in
   let c_cfcu = Vec3.normalize (Vec3.cross c.camera_front c.camera_up) in
   let speed = c.camera_speed *. dt in
     match key with
       GLFW.W -> c.camera_pos <- Vec3.(c.camera_pos + (c.camera_front * speed))
-    | GLFW.A -> c.camera_pos <- Vec3.(c.camera_pos - (c.camera_front * speed))
-    | GLFW.S -> c.camera_pos <- Vec3.(c.camera_pos - (c_cfcu * speed))
-    | GLFW.D -> c.camera_pos <- Vec3.(c.camera_pos + (c_cfcu * speed))
-    | _ -> ()
+      | GLFW.A -> c.camera_pos <- Vec3.(c.camera_pos - (c.camera_front * speed))
+      | GLFW.S -> c.camera_pos <- Vec3.(c.camera_pos - (c_cfcu * speed))
+      | GLFW.D -> c.camera_pos <- Vec3.(c.camera_pos + (c_cfcu * speed))
+      | GLFW.LeftShift -> ( match action with
+                              GLFW.Press -> c.camera_speed <- c.camera_speed *. 2.0
+                              | GLFW.Release -> c.camera_speed <- c.camera_speed *. 0.5
+                              | _ -> ())
+      | _ -> ()
