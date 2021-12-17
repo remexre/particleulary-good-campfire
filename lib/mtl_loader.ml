@@ -1,19 +1,21 @@
+open Assets
 open Util
+module StringMap = Map.Make (String)
 
 type illumination_model = Highlight | TransparencyAndRayTracedReflections
 
 type mtl_directive =
   | NewMTL of string
   | Illum of illumination_model
-  | AmbientColor of Vec3.t
-  | DiffuseColor of Vec3.t
-  | SpecularColor of Vec3.t
+  | AmbientColor of float * float * float
+  | DiffuseColor of float * float * float
+  | SpecularColor of float * float * float
   | SpecularExponent of float
   | Dissolve of float
-  | TransmissionFilter of Vec3.t
+  | TransmissionFilter of float * float * float
   | IndexOfRefraction of float
   | MapDiffuseColor of string
-  | EmissiveColor of Vec3.t
+  | EmissiveColor of float * float * float
 
 let parse_mtl_directive line =
   let inner chunks =
@@ -43,7 +45,68 @@ let parse_mtl_directive line =
   in
   inner
 
-let load_file ~(path : string) : unit =
+type mat = {
+  ambient : float * float * float;
+  diffuse : float * float * float;
+  diffuse_map : Texture.t option;
+  specular : float * float * float;
+  specular_exponent : float;
+}
+
+let default_mat =
+  {
+    ambient = (0.0, 0.0, 0.0);
+    diffuse = (0.0, 0.0, 0.0);
+    diffuse_map = None;
+    specular = (0.0, 0.0, 0.0);
+    specular_exponent = 0.0;
+  }
+
+let finish_state = function
+  | Some (name, mat), materials -> StringMap.add name mat materials
+  | None, materials -> materials
+
+let update_state (current_material, materials) = function
+  | NewMTL name ->
+      (Some (name, default_mat), finish_state (current_material, materials))
+  | Illum _ ->
+      Printf.eprintf "Warning: skipping Illum\n";
+      (current_material, materials)
+  | AmbientColor (r, g, b) ->
+      let name, mat = Option.get current_material in
+      (Some (name, { mat with ambient = (r, g, b) }), materials)
+  | DiffuseColor (r, g, b) ->
+      let name, mat = Option.get current_material in
+      (Some (name, { mat with diffuse = (r, g, b) }), materials)
+  | SpecularColor (r, g, b) ->
+      let name, mat = Option.get current_material in
+      (Some (name, { mat with specular = (r, g, b) }), materials)
+  | SpecularExponent k ->
+      let name, mat = Option.get current_material in
+      (Some (name, { mat with specular_exponent = k }), materials)
+  | Dissolve _ ->
+      Printf.eprintf "Warning: skipping Dissolve\n";
+      (current_material, materials)
+  | TransmissionFilter _ ->
+      Printf.eprintf "Warning: skipping TransmissionFilter\n";
+      (current_material, materials)
+  | IndexOfRefraction _ ->
+      Printf.eprintf "Warning: skipping IndexOfRefraction\n";
+      (current_material, materials)
+  | MapDiffuseColor path ->
+      let texture =
+        try Texture.load path
+        with exc ->
+          failf "Failed to load texture %S: %s" path (Printexc.to_string exc)
+      in
+
+      let name, mat = Option.get current_material in
+      (Some (name, { mat with diffuse_map = Some texture }), materials)
+  | EmissiveColor _ ->
+      Printf.eprintf "Warning: skipping EmissiveColor\n";
+      (current_material, materials)
+
+let load_file ~(path : string) =
   read_file_to_string ~path |> String.split_on_char '\n' |> List.to_seq
   |> Seq.map (List.hd % String.split_on_char '#')
   |> Seq.map String.trim
@@ -52,6 +115,5 @@ let load_file ~(path : string) : unit =
          String.split_on_char ' ' line
          |> List.filter (( <> ) "")
          |> parse_mtl_directive line)
-  (* DEBUG *)
-  |> List.of_seq
-  |> List.length |> Printf.printf "%d\n"
+  |> Seq.fold_left update_state (None, StringMap.empty)
+  |> finish_state
