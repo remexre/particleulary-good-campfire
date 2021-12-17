@@ -32,4 +32,11 @@ in vec3 msPosition;
 in vec3 msNormals;
 in vec2 texCoords;
 
-void main() { gl_Position = proj * view * model * vec4(msPosition, 1); }
+// We need to manually specify anything we want to pass to the fragment shader,
+// even if it's a vertex attribute.
+out vec2 texCoordsFrag;
+
+void main() {
+  gl_Position = proj * view * model * vec4(msPosition, 1);
+  texCoordsFrag = texCoords;
+}
