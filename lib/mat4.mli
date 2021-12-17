@@ -26,3 +26,5 @@ val scale : x:float -> y:float -> z:float -> t
 val scale_uniform : float -> t
 
 val translate : x:float -> y:float -> z:float -> t
+
+val look_at : eye:(Vec3.t) -> dir:(Vec3.t) -> up:(Vec3.t) -> t
