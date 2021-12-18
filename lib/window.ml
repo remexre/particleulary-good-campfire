@@ -1,5 +1,4 @@
-type event = CursorPos of float * float 
-           | Key of GLFW.key * GLFW.key_action
+type event = CursorPos of float * float | Key of GLFW.key * GLFW.key_action
 
 type t = GLFW.window * event Queue.t
 
@@ -47,6 +46,9 @@ let make_window () : t =
     (GLFW.setKeyCallback ~window
        ~f:(Some (fun _ key _ action _ -> Queue.push (Key (key, action)) events)));
 
+  (* Set the input mode for the mouse. *)
+  GLFW.setInputMode ~window ~mode:GLFW.Cursor ~value:GLFW.Disabled;
+
   (* Return the window and queue. *)
   (window, events)
 
@@ -71,6 +73,6 @@ let loop ~(window : t) (body : float -> event list -> unit) : unit =
   in
   inner_loop (GLFW.getTime ())
 
-let size ~(window : t) : (int * int) =
-  let (window, _) = window in
+let size ~(window : t) : int * int =
+  let window, _ = window in
   GLFW.getWindowSize ~window
