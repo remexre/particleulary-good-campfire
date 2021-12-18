@@ -1,5 +1,7 @@
 #version 330
 
+in vec4 wsNormals;
+
 out vec4 color;
 
-void main() { color = vec4(1, 0, 1, 0); }
+void main() { color = (wsNormals + vec4(1)) / 2; }
