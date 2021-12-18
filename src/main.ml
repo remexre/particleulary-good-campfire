@@ -4,8 +4,8 @@ let main () : unit =
   Window.with_window (fun window ->
       Printf.printf "OpenGL driver from %s\n"
         (Option.get (Gl.get_string Gl.vendor));
-
-      let camera = Camera.init (0.0, 0.0, 0.3) in
+      let wsize = Window.size ~window in
+      let camera = Camera.init (0.0, 0.0, 0.3) wsize in
       let particle_system = Particle_system.init 0 (0.0, 0.0, 0.0) in
       let scene = Render.init_scene particle_system camera in
       Window.loop ~window (fun dt events ->

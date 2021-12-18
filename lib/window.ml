@@ -1,4 +1,5 @@
-type event = CursorPos of float * float | Key of GLFW.key * GLFW.key_action
+type event = CursorPos of float * float 
+           | Key of GLFW.key * GLFW.key_action
 
 type t = GLFW.window * event Queue.t
 
@@ -69,3 +70,7 @@ let loop ~(window : t) (body : float -> event list -> unit) : unit =
       inner_loop start_time
   in
   inner_loop (GLFW.getTime ())
+
+let size ~(window : t) : (int * int) =
+  let (window, _) = window in
+  GLFW.getWindowSize ~window
