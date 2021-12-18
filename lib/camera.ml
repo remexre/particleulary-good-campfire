@@ -1,9 +1,4 @@
 (* Based on: https://learnopengl.com/Getting-started/Camera*)
-type m = {
-  mutable first_mouse : bool;
-  mutable last_pos : (float * float);
-}
-
 type t = {
   (* camera *)
   mutable camera_pos : Vec3.t;
@@ -15,7 +10,7 @@ type t = {
   mutable pitch : float;
 
   (* options *)
-  mouse : m;
+  mutable last_mouse_pos : (float * float);
   mutable movement_speed : float;
 
 }
@@ -36,20 +31,23 @@ let camera_right dir =
   let up = (0.0, 1.0, 0.0) in
     Vec3.cross up dir
 
-let init (pos : Vec3.t) ((w, h) : (int * int)) =
+let init (pos : Vec3.t) (window : Window.t) =
   let dir = camera_direction pos in
   let right = camera_right dir in
   let up = Vec3.cross dir right in
   let front = (0.0, 0.0, 0.0-.1.0) in
+  let (w, h) = Window.size ~window in
+  let (xpos, ypos) = (Float.of_int (w/2), Float.of_int (h/2)) in
+    Window.setCursor ~window xpos ypos;
     {
       camera_pos = pos;
       camera_front = front;
       camera_up = up;
 
-      yaw = 0.0 -. 90.0;
+      yaw = 0.0;
       pitch = 0.0;
 
-      mouse = {first_mouse = true; last_pos = (Float.of_int (w/2), Float.of_int (h/2));};
+      last_mouse_pos = (xpos, ypos);
       movement_speed = 0.5;
     }
 
@@ -64,11 +62,9 @@ let process_cursor (c : t) (xoffset, yoffset) =
 let process_input (c : t) (input : Window.event) (dt : float) =
   match input with
   | CursorPos (x, y) -> (
-    if (c.mouse.first_mouse = true) 
-      then (c.mouse.last_pos <- (x, y); c.mouse.first_mouse <- false);
-    let (lx, ly) = c.mouse.last_pos in
+    let (lx, ly) = c.last_mouse_pos in
       process_cursor c (x -. lx, ly -. y);
-      c.mouse.last_pos <- (x, y)
+      c.last_mouse_pos <- (x, y)
   )
   | Key (key, action) -> (
       let c_cfcu = Vec3.normalize (Vec3.cross c.camera_front c.camera_up) in
