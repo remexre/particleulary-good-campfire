@@ -74,14 +74,15 @@ let translate ~(x : float) ~(y : float) ~(z : float) : t =
     (x, y, z, 1.0) )
 
 let look_at ~eye ~dir ~up =
-  let (fx, fy, fz) = Vec3.normalize dir in
-    let (sx, sy, sz) = Vec3.normalize (Vec3.cross (fx, fy, fz) up) in
-      let (ux, uy, uz) = Vec3.cross (sx, sy, sz) (fx, fy, fz) in
-        let e = (Vec3.dot Vec3.(zero - eye) (sx, sy, sz), 
-                 Vec3.dot Vec3.(zero - eye) (ux, uy, uz),
-                 Vec3.dot eye (fx, fy, fz),
-                 1.0) in
-          ((sx, ux, 0.0 -. fx, 0.0),
-          (sy, uy, 0.0 -. fy, 0.0),
-          (sz, uz, 0.0 -. fz, 0.0),
-          (e))
+  let (fx, fy, fz) = Vec3.normalize Vec3.(dir - eye) in
+  let (vx, vy, vz) = Vec3.normalize up in
+  let (sx, sy, sz) = Vec3.normalize (Vec3.cross (fx, fy, fz) (vx, vy, vz)) in
+  let (ux, uy, uz) = Vec3.cross (sx, sy, sz) (fx, fy, fz) in
+  let e = (0.0 -. (Vec3.dot (sx, sy, sz) eye), 
+           0.0 -. (Vec3.dot (ux, uy, uz) eye),
+           Vec3.dot (fx, fy, fz) eye,
+           1.0) in
+    ((sx, ux, 0.0 -. fx, 0.0),
+     (sy, uy, 0.0 -. fy, 0.0),
+     (sz, uz, 0.0 -. fz, 0.0),
+     e)
