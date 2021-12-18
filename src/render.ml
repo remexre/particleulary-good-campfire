@@ -96,18 +96,19 @@ let render (scene : scene) : unit =
   VAO.bind scene.vao;
 
   (* Enable the depth test. *)
-  (*   Gl.enable Gl.depth_test; *)
+  Gl.enable Gl.depth_test;
+  Gl.depth_func Gl.less;
 
   (* Clear the previous frame. *)
   Gl.clear_color 0.0 0.0 0.2 1.0;
-  Gl.clear_depth 0.0;
+  Gl.clear_depth 1.0;
   Gl.clear (Int.logor Gl.color_buffer_bit Gl.depth_buffer_bit);
 
   (* Render the objects other than the particles. *)
   Array.iter
     (fun renderable ->
       render_one renderable (Camera.view scene.camera) scene.proj_matrix)
-    scene.opaque_objects
+    scene.opaque_objects;
 
-(* Disable the depth test. *)
-(*   Gl.disable Gl.depth_test *)
+  (* Disable the depth test. *)
+  Gl.disable Gl.depth_test
