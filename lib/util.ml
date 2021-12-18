@@ -37,6 +37,36 @@ let list_of_queue (queue : 'a Queue.t) : 'a list =
   Queue.clear queue;
   out
 
+let split_on pred xs =
+  List.fold_left
+    (fun (current, previous) ele ->
+      if pred ele then
+        match current with
+        | Some current -> (Some [], current :: previous)
+        | None -> (Some [], previous)
+      else
+        match current with
+        | Some current -> (Some (ele :: current), previous)
+        | None -> (Some [ ele ], previous))
+    (None, []) xs
+  |> (function Some xs, xss -> xs :: xss | None, xss -> xss)
+  |> List.rev_map List.rev
+
+let split_and_group (f : 'a -> ('b, 'c) Either.t) (xs : 'a list) :
+    'b list * ('c * 'b list) list =
+  List.fold_left
+    (fun state x ->
+      match (state, f x) with
+      | `Initial ys, Left y -> `Initial (y :: ys)
+      | `Initial ys, Right z -> `Running (List.rev ys, [], z, [])
+      | `Running (init, zss, z, ys), Left y -> `Running (init, zss, z, y :: ys)
+      | `Running (init, zss, z, ys), Right z' ->
+          `Running (init, (z, List.rev ys) :: zss, z', []))
+    (`Initial []) xs
+  |> function
+  | `Initial ys -> (List.rev ys, [])
+  | `Running (init, zss, z, ys) -> (init, List.rev ((z, ys) :: zss))
+
 let string_starts_with ~(prefix : string) (s : string) : bool =
   let prefix_len = String.length prefix in
   prefix = ""

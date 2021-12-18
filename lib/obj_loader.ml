@@ -234,8 +234,14 @@ let insert_texcoords_if_needed (faces : face_with_optional_texcoords Seq.t) :
 let faces_of_string obj_path src =
   let directives = obj_directives_of_string obj_path src in
   let extract_directives f = directives |> Seq.filter_map f |> Array.of_seq in
-  (* TODO: It should be possible to do one traversal instead of four. *)
-  let positions =
+  (* TODO: It should be possible to do one traversal instead of five. *)
+  let _materials =
+    directives
+    |> Seq.filter_map (function
+         | MTLLib materials -> Some materials
+         | _ -> None)
+    |> Seq.fold_left (StringMap.union (fun _ a _ -> Some a)) StringMap.empty
+  and positions =
     extract_directives (function
       | Position (x, y, z) -> Some (x, y, z)
       | _ -> None)
@@ -254,6 +260,12 @@ let faces_of_string obj_path src =
              (`Face
                (List.map (index_face_elem positions texcoords normals) faces))
        | SmoothShading group -> Some (`SmoothShading group)
+       | Object o ->
+           Printf.printf "o %S\n" o;
+           None
+       | Group o ->
+           Printf.printf "g %S\n" o;
+           None
        | _ -> None)
   |> Seq.fold_left
        (fun (smoothing_groups, current_group, current_group_index) -> function
