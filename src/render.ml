@@ -19,7 +19,8 @@ type scene = {
   mutable proj_matrix : Mat4.t;
 }
 
-let init_scene (particle_system : Particle_system.particle_system) (camera : Camera.t) : scene =
+let init_scene (particle_system : Particle_system.particle_system)
+    (camera : Camera.t) : scene =
   let vert_default = VertexShader.load "shaders/default" in
   let _frag_debug = FragmentShader.load "shaders/debug" in
   let frag_tex_no_lighting = FragmentShader.load "shaders/tex_no_lighting" in
@@ -93,10 +94,20 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
 
 let render (scene : scene) : unit =
   VAO.bind scene.vao;
-  Gl.clear_color 0.0 0.0 0.1 1.0;
+
+  (* Enable the depth test. *)
+  (*   Gl.enable Gl.depth_test; *)
+
+  (* Clear the previous frame. *)
+  Gl.clear_color 0.0 0.0 0.2 1.0;
   Gl.clear_depth 0.0;
   Gl.clear (Int.logor Gl.color_buffer_bit Gl.depth_buffer_bit);
+
+  (* Render the objects other than the particles. *)
   Array.iter
     (fun renderable ->
       render_one renderable (Camera.view scene.camera) scene.proj_matrix)
     scene.opaque_objects
+
+(* Disable the depth test. *)
+(*   Gl.disable Gl.depth_test *)
