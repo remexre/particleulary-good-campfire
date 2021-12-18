@@ -11,7 +11,7 @@ type vec2 = float * float
 type obj_directive =
   | Object of string
   | Group of string
-  | MTLLib of string
+  | MTLLib of Mtl_loader.mat StringMap.t
   | UseMTL of string
   | Position of Vec3.t
   | Texcoord of vec2
@@ -39,7 +39,7 @@ let parse_face_indices elem =
         }
   | _ -> None
 
-let parse_obj_directive line =
+let parse_obj_directive obj_path line =
   let inner chunks =
     try
       match chunks with
@@ -58,7 +58,9 @@ let parse_obj_directive line =
       | [ "vt"; s; t ] -> Some (Texcoord (Float.of_string s, Float.of_string t))
       | [ "g"; name ] -> Some (Group name)
       | [ "o"; name ] -> Some (Object name)
-      | [ "mtllib"; name ] -> Some (MTLLib name)
+      | [ "mtllib"; name ] ->
+          let path = join_paths (Filename.dirname obj_path) name in
+          Some (MTLLib (Mtl_loader.load_file ~path))
       | [ "usemtl"; name ] -> Some (UseMTL name)
       | _ -> failf "Unknown OBJ directive %S" line
     with exc ->
@@ -66,7 +68,7 @@ let parse_obj_directive line =
   in
   inner
 
-let obj_directives_of_string src =
+let obj_directives_of_string obj_path src =
   String.split_on_char '\n' src
   |> List.to_seq
   |> Seq.map (List.hd % String.split_on_char '#')
@@ -75,7 +77,7 @@ let obj_directives_of_string src =
   |> Seq.filter_map (fun line ->
          String.split_on_char ' ' line
          |> List.filter (( <> ) "")
-         |> parse_obj_directive line)
+         |> parse_obj_directive obj_path line)
 
 module GroupMap = Map.Make (struct
   type t = int option
@@ -229,8 +231,8 @@ let insert_texcoords_if_needed (faces : face_with_optional_texcoords Seq.t) :
   in
   Array.of_seq (Seq.map insert_texcoords_if_needed_1 faces)
 
-let faces_of_string src =
-  let directives = obj_directives_of_string src in
+let faces_of_string obj_path src =
+  let directives = obj_directives_of_string obj_path src in
   let extract_directives f = directives |> Seq.filter_map f |> Array.of_seq in
   (* TODO: It should be possible to do one traversal instead of four. *)
   let positions =
@@ -269,7 +271,7 @@ let faces_of_string src =
   |> Seq.flat_map List.to_seq |> insert_texcoords_if_needed
 
 let load_file ~(path : string) =
-  let faces = faces_of_string (Util.read_file_to_string ~path) in
+  let faces = faces_of_string path (Util.read_file_to_string ~path) in
   Array.to_seq faces
   |> Seq.flat_map
        (fun

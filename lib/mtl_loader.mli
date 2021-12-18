@@ -1,6 +1,5 @@
 open Assets
-
-module StringMap : Map.S with type key = string
+open Util
 
 type mat = {
   ambient : float * float * float;

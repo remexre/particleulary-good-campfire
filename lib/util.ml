@@ -1,3 +1,5 @@
+module StringMap = Map.Make (String)
+
 let ( % ) f g x = f (g x)
 
 let bracket (init : unit -> 'a) (cleanup : 'a -> unit) (body : 'a -> 'b) : 'b =

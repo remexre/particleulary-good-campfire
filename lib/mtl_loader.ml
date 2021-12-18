@@ -1,6 +1,5 @@
 open Assets
 open Util
-module StringMap = Map.Make (String)
 
 type illumination_model = Highlight | TransparencyAndRayTracedReflections
 
