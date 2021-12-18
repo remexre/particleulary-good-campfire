@@ -1,4 +1,4 @@
-(* Based on: https://learnopengl.com/Getting-started/Camera*)
+(* Based on: https://learnopengl.com/Getting-started/Camera *)
 type t = {
   (* camera *)
   mutable camera_pos : Vec3.t;
@@ -54,8 +54,8 @@ let init (pos : Vec3.t) (window : Window.t) =
 let process_cursor (c : t) (xoffset, yoffset) =
   let s = 0.0001 in
   let (x, y) = (s *. xoffset, s *. yoffset) in
-    c.yaw <- c.yaw +. x;
-    c.pitch <- c.pitch +. y;
+    c.yaw <- c.yaw -. x;
+    c.pitch <- c.pitch -. y;
     if (c.pitch > 89.0) then c.pitch <- 89.0;
     if (c.pitch < (0.0 -. 89.0)) then c.pitch <- (0.0 -. 89.0)
 
@@ -63,7 +63,7 @@ let process_input (c : t) (input : Window.event) (dt : float) =
   match input with
   | CursorPos (x, y) -> (
     let (lx, ly) = c.last_mouse_pos in
-      process_cursor c (x -. lx, ly -. y);
+      process_cursor c (x -. lx, y -. ly);
       c.last_mouse_pos <- (x, y)
   )
   | Key (key, action) -> (
