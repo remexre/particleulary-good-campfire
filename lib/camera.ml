@@ -13,7 +13,7 @@ type t = {
   camera_right : Vec3.t;
   camera_up : Vec3.t;
   mutable camera_front : Vec3.t;
-  mouse_callback : mc;
+  (*mouse_callback : mc;*)
 }
 
 let camera_direction pos =
@@ -41,16 +41,16 @@ let init (pos : Vec3.t) =
     camera_right = cr;
     camera_up = cu;
     camera_front = cf;
-    mouse_callback = 
+    (*mouse_callback = 
       {first_mouse = true;
       last_pos = (0.0, 0.0);
       sensitivity = 0.0001;
-      yaw = 0.0;
+      yaw = 0.0 -. 90.0;
       pitch = 0.0;
-      }
+      }*)
     }
 
-let process_cursor (c : t) (xpos, ypos) =
+(*let process_cursor (c : t) (xpos, ypos) =
   let mc = c.mouse_callback in
   let (last_x, last_y) =
     if mc.first_mouse
@@ -71,18 +71,18 @@ let process_cursor (c : t) (xpos, ypos) =
     let direction = ((Float.cos (to_radians (yaw))) *. (Float.cos (to_radians(pitch))),
                      Float.sin (to_radians(pitch)),
                      (Float.sin (to_radians(yaw)) *. Float.cos (to_radians(pitch)))) in
-      c.camera_front <- Vec3.normalize(direction)
+      c.camera_front <- Vec3.normalize(direction)*)
 
 let process_input (c : t) (input : Window.event) (dt : float) =
   match input with
-  | CursorPos (_x, _y) -> (process_cursor c (_x, _y))
+  | CursorPos (_x, _y) -> (*(process_cursor c (_x, _y))*) ()
   | Key (key, action) -> (
       let c_cfcu = Vec3.normalize (Vec3.cross c.camera_front c.camera_up) in
       let speed = c.camera_speed *. dt in
       match key with
       | GLFW.W -> c.camera_pos <- Vec3.(c.camera_pos + (c.camera_front * speed))
-      | GLFW.A -> c.camera_pos <- Vec3.(c.camera_pos - (c.camera_front * speed))
-      | GLFW.S -> c.camera_pos <- Vec3.(c.camera_pos - (c_cfcu * speed))
+      | GLFW.S -> c.camera_pos <- Vec3.(c.camera_pos - (c.camera_front * speed))
+      | GLFW.A -> c.camera_pos <- Vec3.(c.camera_pos - (c_cfcu * speed))
       | GLFW.D -> c.camera_pos <- Vec3.(c.camera_pos + (c_cfcu * speed))
       | GLFW.LeftShift -> ( match action with
                               GLFW.Press -> c.camera_speed <- c.camera_speed *. 2.0

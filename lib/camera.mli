@@ -13,7 +13,7 @@ type t = {
   camera_right : Vec3.t;
   camera_up : Vec3.t;
   mutable camera_front : Vec3.t;
-  mouse_callback : mc;
+  (*mouse_callback : mc;*)
 }
 
 val view : t -> Mat4.t
