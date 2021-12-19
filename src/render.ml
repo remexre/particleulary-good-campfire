@@ -43,12 +43,16 @@ let init_scene (particle_system : Particle_system.particle_system)
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 0.01)
       "assets/campfire/OBJ/Campfire.obj"
   in
-
+  let ground =
+    load_obj debug_program
+    Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 5000.0)
+    "assets/rectangle.obj"
+  in
   (* Make the scene. *)
   {
     vao = VAO.make ();
     particle_system;
-    opaque_objects = Nodes [ campfire ];
+    opaque_objects = Nodes [ campfire; ground ];
     camera;
     proj_matrix =
       Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.1
