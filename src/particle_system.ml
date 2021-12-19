@@ -8,15 +8,7 @@ let init (num_particles : int) (s : Vec3.t) =
   ps
 
 let apply_force_to_all_particles (ps : t) (dir : Vec3.t) =
-  let rec apply_force plst =
-    match plst with
-    | [] -> ()
-    | p :: pars ->
-        Particle.apply_force_to_particle p dir;
-        apply_force pars
-  in
-  apply_force ps.particles
-(*List.map (fun p -> Particle.apply_force_to_particle p dir) ps.particles*)
+  List.iter (fun p -> Particle.apply_force_to_particle p dir) ps.particles
 
 let add_particle (ps : t) =
   let p : Particle.t = Particle.init ps.start in
