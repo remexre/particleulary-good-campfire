@@ -85,3 +85,13 @@ let retain pred dynarr =
       dynarr.storage.(new_length + i) <- None);
   (* Set the length, restoring the second invariant of t. *)
   dynarr.len <- new_length
+
+let sort_by_key sort_key dynarr =
+  Array.fast_sort
+    (fun l r ->
+      match (l, r) with
+      | None, None -> 0
+      | Some _, None -> -1
+      | None, Some _ -> 1
+      | Some l, Some r -> compare (sort_key l) (sort_key r))
+    dynarr.storage

@@ -22,8 +22,11 @@ let animate (ps : t) =
       Particle.alive p)
     ps.particles
 
-let iter f { particles; _ } = DynArr.iter f particles
+let iteri f { particles; _ } = DynArr.iteri f particles
 
 let length { particles; _ } = DynArr.length particles
 
-let nth { particles; _ } n = DynArr.get particles n
+let sort_by_distance_from { particles; _ } from =
+  DynArr.sort_by_key
+    (fun (p : Particle.t) -> Vec3.(magnitude2 (p.pos - from)))
+    particles

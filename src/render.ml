@@ -121,6 +121,32 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
   disable_attrib renderable.program "msNormals";
   disable_attrib renderable.program "texCoords"
 
+let make_particle_system_instance_buffer (camera : Camera.t)
+    (particle_system : Particle_system.t) : Buffer.t =
+  (* Sort the particles by depth, so transparency works right. *)
+  Particle_system.sort_by_distance_from particle_system camera.camera_pos;
+
+  (* Allocate a CPU-side buffer. For now, the only attributes are the position
+   * of the particle and its age, so we need four floats per particle.
+   *)
+  let arr =
+    Bigarray.Array1.create Bigarray.Float32 Bigarray.C_layout
+      (4 * Particle_system.length particle_system)
+  in
+
+  (* Fill in the CPU-side buffer. *)
+  Particle_system.iteri
+    (fun i p ->
+      let x, y, z = p.pos in
+      arr.{i * 4} <- x;
+      arr.{(i * 4) + 1} <- y;
+      arr.{(i * 4) + 2} <- z;
+      arr.{(i * 4) + 3} <- p.age)
+    particle_system;
+
+  (* Move the buffer to the GPU and return the GPU-side handle. *)
+  Buffer.make_static_vbo ~name:"Particle Instance Attributes" ~data:arr
+
 let render (scene : scene) : unit =
   VAO.bind scene.vao;
 
@@ -143,4 +169,12 @@ let render (scene : scene) : unit =
     scene.opaque_objects;
 
   (* Disable the depth test. *)
-  Gl.disable Gl.depth_test
+  Gl.disable Gl.depth_test;
+
+  (* Create the VBO with the instance attributes for the particle system. *)
+  let _particle_instance_attrs =
+    make_particle_system_instance_buffer scene.camera scene.particle_system
+  in
+
+  (* TODO: Finish particle rendering. *)
+  ()

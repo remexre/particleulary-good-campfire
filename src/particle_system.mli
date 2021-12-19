@@ -10,8 +10,8 @@ val add_particles : t -> int -> unit
 
 val animate : t -> unit
 
-val iter : (Particle.t -> unit) -> t -> unit
+val iteri : (int -> Particle.t -> unit) -> t -> unit
 
 val length : t -> int
 
-val nth : t -> int -> Particle.t
+val sort_by_distance_from : t -> Vec3.t -> unit

@@ -20,3 +20,5 @@ val iteri : (int -> 'a -> unit) -> 'a t -> unit
 
 (* https://doc.rust-lang.org/nightly/std/vec/struct.Vec.html#method.retain *)
 val retain : ('a -> bool) -> 'a t -> unit
+
+val sort_by_key : ('a -> 'b) -> 'a t -> unit
