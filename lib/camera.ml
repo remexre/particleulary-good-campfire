@@ -15,13 +15,22 @@ type t = {
 
 }
 
-let view (c : t) = 
-  let (x, y, z) = c.camera_pos in
-  let t = Mat4.translate ~x ~y ~z in
+let view (c : t) =
+  let (x1, y1, z1) = c.camera_pos in
+  let (x, y, z) = (0.0 -. x1, 0.0 -. y1, 0.0 -. z1) in
+  let negation = Mat4.translate ~x ~y ~z in
   let to_radians deg = deg *. (180.0 /. Float.pi) in
   let (pitch, yaw, roll) = (0.0 -. to_radians(c.pitch), 0.0 -. to_radians(c.yaw), 0.0) in
-  let r = Mat4.rotate_euler ~pitch ~yaw ~roll in
-  Mat4.(t * r)
+  let ((y11, y12, y13, y14),
+      (y21, y22, y23, y24),
+      (y31, y32, y33, y34),
+      (y41, y42, y43, y44) ) = Mat4.rotate_euler ~pitch ~yaw ~roll in
+  let rotation =
+     ((y11, y21, y31, y14),
+      (y12, y22, y32, y24),
+      (y13, y23, y33, y34),
+      (y41, y42, y43, y44) ) in
+  Mat4.(negation * rotation)
 
 let camera_direction pos =
   let camera_target = Vec3.zero in
@@ -35,7 +44,7 @@ let init (pos : Vec3.t) (window : Window.t) =
   let dir = camera_direction pos in
   let right = camera_right dir in
   let up = Vec3.cross dir right in
-  let front = (0.0, 0.0, 1.0) in
+  let front = (0.0, 0.0, 0.0 -. 1.0) in
   let (w, h) = Window.size ~window in
   let (xpos, ypos) = (Float.of_int (w/2), Float.of_int (h/2)) in
     Window.setCursor ~window xpos ypos;
@@ -65,7 +74,7 @@ let process_input (c : t) (input : Window.event) (dt : float) =
     let (lx, ly) = c.last_mouse_pos in
       if (lx = x && ly = y) then ()
       else
-        process_cursor c (x -. lx, y -. ly);
+        process_cursor c (lx -. x, ly -. y);
         c.last_mouse_pos <- (x, y)
   )
   | Key (key, action) -> (
