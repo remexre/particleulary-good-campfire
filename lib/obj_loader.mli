@@ -1,1 +1,1 @@
-val load_file : path:string -> Assets.Buffer.t
+val load_file : path:string -> (Mtl_loader.mat * Assets.Buffer.t) list

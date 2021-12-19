@@ -6,40 +6,53 @@ type renderable = {
   program : Program.t;
   vbo : Buffer.t;
   model_matrix : Mat4.t;
-  texture : Texture.t;
+  material : Mtl_loader.mat;
 }
+
+type node = One of renderable | Nodes of node list
+
+let rec each_renderable (f : renderable -> unit) = function
+  | One renderable -> f renderable
+  | Nodes subnodes -> List.iter (each_renderable f) subnodes
+
+let load_obj program model_matrix path : node =
+  Obj_loader.load_file ~path
+  |> List.map (fun (material, vbo) ->
+         One { program; vbo; model_matrix; material })
+  |> fun subnodes -> Nodes subnodes
 
 type scene = {
   vao : VAO.t;
   debug_program : Program.t;
   debug_texture : Texture.t;
   particle_system : Particle_system.particle_system;
-  mutable opaque_objects : renderable array;
+  mutable opaque_objects : node;
   mutable camera : Camera.t;
   mutable proj_matrix : Mat4.t;
 }
 
 let init_scene (particle_system : Particle_system.particle_system)
     (camera : Camera.t) : scene =
+  (* Load the shaders we're going to use. *)
   let vert_default = VertexShader.load "shaders/default" in
   let frag_debug = FragmentShader.load "shaders/debug" in
   let _frag_tex_no_lighting = FragmentShader.load "shaders/tex_no_lighting" in
   let debug_program = Program.link vert_default frag_debug in
-  let example_obj =
-    {
-      program = debug_program;
-      vbo = Obj_loader.load_file ~path:"assets/campfire/OBJ/Campfire.obj";
-      model_matrix =
-        Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 0.01);
-      texture = Texture.load "debug";
-    }
+
+  (* Load the objects. *)
+  let campfire =
+    load_obj debug_program
+      Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 0.01)
+      "assets/campfire/OBJ/Campfire.obj"
   in
+
+  (* Make the scene. *)
   {
     vao = VAO.make ();
     debug_program;
     debug_texture = Texture.load "debug";
     particle_system;
-    opaque_objects = [| example_obj |];
+    opaque_objects = Nodes [ campfire ];
     camera;
     proj_matrix =
       Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.1
@@ -77,12 +90,15 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
   enable_attrib renderable.program "msNormals" ~offset:12 ~count:3 ~stride;
   enable_attrib renderable.program "texCoords" ~offset:24 ~count:2 ~stride;
 
-  (* Bind the texture. *)
-  Gl.active_texture Gl.texture0;
-  Gl.bind_texture Gl.texture_2d (Texture.get_handle renderable.texture);
-  Gl.uniform1i
-    (Gl.get_uniform_location (Program.get_handle renderable.program) "tex")
-    0;
+  (* Bind the texture, if there is one. *)
+  Option.iter
+    (fun texture ->
+      Gl.active_texture Gl.texture0;
+      Gl.bind_texture Gl.texture_2d (Texture.get_handle texture);
+      Gl.uniform1i
+        (Gl.get_uniform_location (Program.get_handle renderable.program) "tex")
+        0)
+    renderable.material.diffuse_map;
 
   (* Draw the model! *)
   Gl.draw_arrays Gl.triangles 0 (Buffer.length renderable.vbo / 32);
@@ -105,7 +121,7 @@ let render (scene : scene) : unit =
   Gl.clear (Int.logor Gl.color_buffer_bit Gl.depth_buffer_bit);
 
   (* Render the objects other than the particles. *)
-  Array.iter
+  each_renderable
     (fun renderable ->
       render_one renderable (Camera.view scene.camera) scene.proj_matrix)
     scene.opaque_objects;

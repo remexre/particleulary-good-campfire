@@ -99,10 +99,11 @@ let separate_groups (groups : 'a list GroupMap.t) : 'a list Seq.t =
   Seq.append explicit_groups implicit_groups
 
 let update_smoothing_group (group : int option)
-    ((smoothing_groups, current_group, current_group_index) :
-      'a list GroupMap.t * 'a list * int option) :
-    'a list GroupMap.t * 'a list * int option =
-  ( GroupMap.update current_group_index
+    ((mtl, smoothing_groups, current_group, current_group_index) :
+      'b * 'a list GroupMap.t * 'a list * int option) :
+    'b * 'a list GroupMap.t * 'a list * int option =
+  ( mtl,
+    GroupMap.update current_group_index
       (Option.some % List.rev_append current_group % Option.value ~default:[])
       smoothing_groups,
     [],
@@ -235,7 +236,7 @@ let faces_of_string obj_path src =
   let directives = obj_directives_of_string obj_path src in
   let extract_directives f = directives |> Seq.filter_map f |> Array.of_seq in
   (* TODO: It should be possible to do one traversal instead of five. *)
-  let _materials =
+  let materials =
     directives
     |> Seq.filter_map (function
          | MTLLib materials -> Some materials
@@ -252,49 +253,77 @@ let faces_of_string obj_path src =
       | Normal (x, y, z) -> Some (x, y, z)
       | _ -> None)
   in
-  let get_smoothing_groups (smoothing_groups, _, _) = smoothing_groups in
-  directives
-  |> Seq.filter_map (function
-       | Face faces ->
-           Some
-             (`Face
-               (List.map (index_face_elem positions texcoords normals) faces))
-       | SmoothShading group -> Some (`SmoothShading group)
-       | Object o ->
-           Printf.printf "o %S\n" o;
-           None
-       | Group o ->
-           Printf.printf "g %S\n" o;
-           None
-       | _ -> None)
-  |> Seq.fold_left
-       (fun (smoothing_groups, current_group, current_group_index) -> function
-         | `Face face ->
-             ( smoothing_groups,
-               split_to_tris face @ current_group,
-               current_group_index )
-         | `SmoothShading group ->
-             update_smoothing_group group
-               (smoothing_groups, current_group, current_group_index))
-       (GroupMap.empty, [], None)
-  |> update_smoothing_group None
-  |> get_smoothing_groups |> separate_groups
-  |> Seq.map compute_normals_if_needed
-  |> Seq.flat_map List.to_seq |> insert_texcoords_if_needed
+  let open Either in
+  let unnamed_directives, named_directives =
+    split_and_group
+      (function
+        | Face faces ->
+            Some
+              (Left
+                 (`Face
+                   (List.map
+                      (index_face_elem positions texcoords normals)
+                      faces)))
+        | SmoothShading group -> Some (Left (`SmoothShading group))
+        | Object name -> Some (Right name)
+        | UseMTL name -> Some (Left (`UseMTL name))
+        | _ -> None)
+      directives
+  in
+  unnamed_directives :: List.map snd named_directives
+  |> List.map (fun directives ->
+         directives
+         |> List.fold_left
+              (fun ( old_mtl,
+                     smoothing_groups,
+                     current_group,
+                     current_group_index ) directive ->
+                match directive with
+                | `Face face ->
+                    ( old_mtl,
+                      smoothing_groups,
+                      split_to_tris face @ current_group,
+                      current_group_index )
+                | `SmoothShading group ->
+                    update_smoothing_group group
+                      ( old_mtl,
+                        smoothing_groups,
+                        current_group,
+                        current_group_index )
+                | `UseMTL name ->
+                    Printf.printf "UseMTL %S\n" name;
+                    let material = StringMap.find_opt name materials in
+                    if Option.is_none material then
+                      Printf.eprintf "Could not find material %S\n" name;
+                    ( material,
+                      smoothing_groups,
+                      current_group,
+                      current_group_index ))
+              (None, GroupMap.empty, [], None)
+         |> update_smoothing_group None
+         |> fun (mtl, smoothing_groups, _, _) ->
+         ( mtl,
+           smoothing_groups |> separate_groups
+           |> Seq.map compute_normals_if_needed
+           |> Seq.flat_map List.to_seq |> insert_texcoords_if_needed ))
 
 let load_file ~(path : string) =
-  let faces = faces_of_string path (Util.read_file_to_string ~path) in
-  Array.to_seq faces
-  |> Seq.flat_map
-       (fun
-         {
-           positions = p1, p2, p3;
-           texcoords = t1, t2, t3;
-           normals = n1, n2, n3;
-         }
-       -> List.to_seq [ (p1, t1, n1); (p2, t2, n2); (p3, t3, n3) ])
-  |> Seq.flat_map (fun ((px, py, pz), (tu, tv), (nx, ny, nz)) ->
-         List.to_seq [ px; py; pz; nx; ny; nz; tu; tv ])
-  |> Array.of_seq
-  |> Bigarray.Array1.of_array Bigarray.Float32 Bigarray.C_layout
-  |> fun data -> Assets.Buffer.make_static_vbo ~name:path ~data
+  List.map
+    (fun (mtl, faces) ->
+      Array.to_seq faces
+      |> Seq.flat_map
+           (fun
+             {
+               positions = p1, p2, p3;
+               texcoords = t1, t2, t3;
+               normals = n1, n2, n3;
+             }
+           -> List.to_seq [ (p1, t1, n1); (p2, t2, n2); (p3, t3, n3) ])
+      |> Seq.flat_map (fun ((px, py, pz), (tu, tv), (nx, ny, nz)) ->
+             List.to_seq [ px; py; pz; nx; ny; nz; tu; tv ])
+      |> Array.of_seq
+      |> Bigarray.Array1.of_array Bigarray.Float32 Bigarray.C_layout
+      |> fun data ->
+      ( Option.value mtl ~default:Mtl_loader.default_mat,
+        Assets.Buffer.make_static_vbo ~name:path ~data ))
+    (faces_of_string path (Util.read_file_to_string ~path))

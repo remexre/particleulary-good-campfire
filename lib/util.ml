@@ -52,15 +52,17 @@ let split_on pred xs =
   |> (function Some xs, xss -> xs :: xss | None, xss -> xss)
   |> List.rev_map List.rev
 
-let split_and_group (f : 'a -> ('b, 'c) Either.t) (xs : 'a list) :
+let split_and_group (f : 'a -> ('b, 'c) Either.t option) (xs : 'a Seq.t) :
     'b list * ('c * 'b list) list =
-  List.fold_left
+  Seq.fold_left
     (fun state x ->
       match (state, f x) with
-      | `Initial ys, Left y -> `Initial (y :: ys)
-      | `Initial ys, Right z -> `Running (List.rev ys, [], z, [])
-      | `Running (init, zss, z, ys), Left y -> `Running (init, zss, z, y :: ys)
-      | `Running (init, zss, z, ys), Right z' ->
+      | _, None -> state
+      | `Initial ys, Some (Left y) -> `Initial (y :: ys)
+      | `Initial ys, Some (Right z) -> `Running (List.rev ys, [], z, [])
+      | `Running (init, zss, z, ys), Some (Left y) ->
+          `Running (init, zss, z, y :: ys)
+      | `Running (init, zss, z, ys), Some (Right z') ->
           `Running (init, (z, List.rev ys) :: zss, z', []))
     (`Initial []) xs
   |> function

@@ -9,4 +9,6 @@ type mat = {
   specular_exponent : float;
 }
 
+val default_mat : mat
+
 val load_file : path:string -> mat StringMap.t
