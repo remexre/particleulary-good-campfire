@@ -23,6 +23,7 @@ let load_obj program model_matrix path : node =
 
 type scene = {
   vao : VAO.t;
+  sphere_vbo : Buffer.t;
   particle_system : Particle_system.t;
   mutable opaque_objects : node;
   mutable camera : Camera.t;
@@ -42,15 +43,21 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     load_obj debug_program
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 0.01)
       "assets/campfire/OBJ/Campfire.obj"
-  in
-  let ground =
+  and ground =
     load_obj debug_program
-    Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 5000.0)
-    "assets/rectangle.obj"
+      Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 5000.0)
+      "assets/rectangle.obj"
   in
+
+  (* Load the sphere model. *)
+  let sphere_vbo =
+    Obj_loader.load_file ~path:"assets/sphere.obj" |> List.hd |> snd
+  in
+
   (* Make the scene. *)
   {
     vao = VAO.make ();
+    sphere_vbo;
     particle_system;
     opaque_objects = Nodes [ campfire; ground ];
     camera;
