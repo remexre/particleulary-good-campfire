@@ -10,11 +10,8 @@ let main () : unit =
       Window.loop ~window (fun dt events ->
           (* TODO: Actually handle input events! For now, we just print how many there were. *)
           List.iter (fun e -> Camera.process_input camera e dt) events;
-          let l = List.length events in
-          if l > 0 then Printf.printf "%d events\n%!" l;
 
           (* TODO: Physics update *)
-          let _ = dt in
           let dir = (0.5, 1.0, 0.0) in
           Particle_system.apply_force_to_all_particles particle_system dir;
           Particle_system.animate particle_system;

@@ -25,6 +25,9 @@ let make_window () : t =
   GLFW.windowHint ~hint:GLFW.BlueBits ~value:(Some video_mode.blue_bits);
   GLFW.windowHint ~hint:GLFW.RefreshRate ~value:(Some video_mode.refresh_rate);
 
+  (* Prepare for 4x MSAA. *)
+  GLFW.windowHint ~hint:GLFW.Samples ~value:(Some 4);
+
   (* Create the window. *)
   let window =
     GLFW.createWindow ~width:video_mode.width ~height:video_mode.height

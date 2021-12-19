@@ -44,6 +44,8 @@
             src = ./.;
             doCheck = true;
 
+            OCAMLRUNPARAM = "b";
+
             buildInputs =
               [ packages.glfw-ocaml packages.tgls pkgs.ocamlPackages.imagelib ];
             postInstall = ''

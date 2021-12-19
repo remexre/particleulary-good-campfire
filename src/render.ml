@@ -23,18 +23,21 @@ let load_obj program model_matrix path : node =
 
 type scene = {
   vao : VAO.t;
-  particle_system : Particle_system.particle_system;
+  sphere_vbo : Buffer.t;
+  particle_system : Particle_system.t;
   mutable opaque_objects : node;
   mutable camera : Camera.t;
   mutable proj_matrix : Mat4.t;
 }
 
-let init_scene (particle_system : Particle_system.particle_system)
-    (camera : Camera.t) : scene =
+let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
+    =
   (* Load the shaders we're going to use. *)
-  let vert_default = VertexShader.load "shaders/default" in
-  let frag_debug = FragmentShader.load "shaders/debug" in
-  let _frag_tex_no_lighting = FragmentShader.load "shaders/tex_no_lighting" in
+  let vert_default = VertexShader.load "assets/shaders/default" in
+  let frag_debug = FragmentShader.load "assets/shaders/debug" in
+  let _frag_tex_no_lighting =
+    FragmentShader.load "assets/shaders/tex_no_lighting"
+  in
   let debug_program = Program.link vert_default frag_debug in
 
   (* Load the objects. *)
@@ -42,15 +45,21 @@ let init_scene (particle_system : Particle_system.particle_system)
     load_obj debug_program
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 0.01)
       "assets/campfire/OBJ/Campfire.obj"
-  in
-  let ground =
+  and ground =
     load_obj debug_program
-    Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 5000.0)
-    "assets/rectangle.obj"
+      Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 5000.0)
+      "assets/rectangle.obj"
   in
+
+  (* Load the sphere model. *)
+  let sphere_vbo =
+    Obj_loader.load_file ~path:"assets/sphere.obj" |> List.hd |> snd
+  in
+
   (* Make the scene. *)
   {
     vao = VAO.make ();
+    sphere_vbo;
     particle_system;
     opaque_objects = Nodes [ campfire; ground ];
     camera;
@@ -114,6 +123,9 @@ let render (scene : scene) : unit =
   (* Enable the depth test. *)
   Gl.enable Gl.depth_test;
   Gl.depth_func Gl.less;
+
+  (* Enable MSAA. *)
+  Gl.enable Gl.multisample;
 
   (* Clear the previous frame. *)
   Gl.clear_color 0.0 0.0 0.2 1.0;

@@ -15,9 +15,7 @@ let find_file : string -> string =
     else if base = "/" then failf "Couldn't find %s" path
     else loop ~base:(Filename.dirname base) ~path
   in
-  fun (name : string) ->
-    let path = "assets/" ^ name in
-    if exists ~path then realpath ~path else loop ~base:exe_path ~path
+  fun path -> if exists ~path then realpath ~path else loop ~base:exe_path ~path
 
 module type Asset = sig
   type t
