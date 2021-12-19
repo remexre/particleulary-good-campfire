@@ -35,10 +35,14 @@ in vec2 texCoords;
 // We need to manually specify anything we want to pass to the fragment shader,
 // even if it's a vertex attribute.
 out vec2 texCoordsFrag;
+out vec4 wsPosition;
 out vec4 wsNormals;
 
 void main() {
-  gl_Position = proj * view * model * vec4(msPosition, 1);
-  wsNormals = normalize(model * vec4(msNormals, 0));
   texCoordsFrag = texCoords;
+
+  wsPosition = model * vec4(msPosition, 1);
+  wsNormals = normalize(model * vec4(msNormals, 0));
+
+  gl_Position = proj * view * wsPosition;
 }
