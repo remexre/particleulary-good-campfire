@@ -15,11 +15,20 @@ let rec each_renderable (f : renderable -> unit) = function
   | One renderable -> f renderable
   | Nodes subnodes -> List.iter (each_renderable f) subnodes
 
+let load_objs program path model_matrices : node =
+  let mats_and_vbos = Obj_loader.load_file ~path in
+  Nodes
+    (List.map
+       (fun model_matrix ->
+         Nodes
+           (List.map
+              (fun (material, vbo) ->
+                One { program; vbo; material; model_matrix })
+              mats_and_vbos))
+       model_matrices)
+
 let load_obj program model_matrix path : node =
-  Obj_loader.load_file ~path
-  |> List.map (fun (material, vbo) ->
-         One { program; vbo; model_matrix; material })
-  |> fun subnodes -> Nodes subnodes
+  load_objs program path [ model_matrix ]
 
 type scene = {
   vao : VAO.t;
@@ -37,36 +46,40 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
   let vert_default = VertexShader.load "assets/shaders/default" in
   let vert_particle = VertexShader.load "assets/shaders/particle" in
   let frag_debug = FragmentShader.load "assets/shaders/debug" in
-  let _frag_tex_no_lighting =
+  let frag_lighting_no_tex =
+    FragmentShader.load "assets/shaders/lighting_no_tex"
+  in
+  let frag_tex_no_lighting =
     FragmentShader.load "assets/shaders/tex_no_lighting"
   in
   let debug_program = Program.link vert_default frag_debug
-  and particle_program = Program.link vert_particle frag_debug in
+  and no_tex_program = Program.link vert_default frag_lighting_no_tex
+  and particle_program = Program.link vert_particle frag_debug
+  and tex_program = Program.link vert_default frag_tex_no_lighting in
 
   (* Load the objects. *)
   let campfire =
-    load_obj debug_program
+    load_obj tex_program
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 0.01)
       "assets/campfire/OBJ/Campfire.obj"
   and ground =
     load_obj debug_program
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 5000.0)
       "assets/rectangle.obj"
+  and mushrooms =
+    load_obj no_tex_program
+      Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 1.0)
+      "assets/mushrooms.obj"
   and trees =
-    let conifer = "assets/conifer_macedonian_pine/conifer_macedonian_pine.obj" in
-    let ts = [
-      (load_obj debug_program
-        Mat4.(translate ~x:(25.0) ~y:(0.0) ~z:(-1000.0) * scale_uniform (0.005)) conifer);
-      (load_obj debug_program
-        Mat4.(translate ~x:(-400.0) ~y:(0.0) ~z:(-2000.0) * scale_uniform (0.007)) conifer);
-      (load_obj debug_program
-        Mat4.(translate ~x:(700.0) ~y:(0.0) ~z:(-50.0) * scale_uniform (0.01)) conifer);
-      (load_obj debug_program
-        Mat4.(translate ~x:(300.0) ~y:(0.0) ~z:(2000.0) * scale_uniform (0.008)) conifer);
-      (load_obj debug_program
-        Mat4.(translate ~x:(-800.0) ~y:(0.0) ~z:(1500.0) * scale_uniform (0.02)) conifer);
-      ] in
-    Nodes (ts)
+    load_objs debug_program
+      "assets/conifer_macedonian_pine/conifer_macedonian_pine.obj"
+      [
+        Mat4.(translate ~x:25.0 ~y:0.0 ~z:(-1000.0) * scale_uniform 0.005);
+        Mat4.(translate ~x:(-400.0) ~y:0.0 ~z:(-2000.0) * scale_uniform 0.007);
+        Mat4.(translate ~x:700.0 ~y:0.0 ~z:(-50.0) * scale_uniform 0.01);
+        Mat4.(translate ~x:300.0 ~y:0.0 ~z:2000.0 * scale_uniform 0.008);
+        Mat4.(translate ~x:(-800.0) ~y:0.0 ~z:1500.0 * scale_uniform 0.02);
+      ]
   in
   (* Load the sphere model. *)
   let sphere_vbo =
@@ -90,7 +103,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     particle_system;
     sphere_vbo;
     particle_program;
-    opaque_objects = Nodes [ campfire; ground; trees ];
+    opaque_objects = Nodes [ campfire; ground; mushrooms; trees ];
     camera;
     proj_matrix =
       Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.1
