@@ -13,8 +13,9 @@ out vec2 texCoordsFrag;
 out vec4 wsNormals;
 
 void main() {
-  mat4 scaling = mat4(vec4(0.1, 0.0, 0.0, 0.0), vec4(0.0, 0.1, 0.0, 0.0),
-                      vec4(0.0, 0.0, 0.1, 0.0), vec4(0.0, 0.0, 0.0, 1.0));
+  float size = 0.1;
+  mat4 scaling = mat4(vec4(size, 0.0, 0.0, 0.0), vec4(0.0, size, 0.0, 0.0),
+                      vec4(0.0, 0.0, size, 0.0), vec4(0.0, 0.0, 0.0, 1.0));
   mat4 translation = mat4(vec4(1.0, 0.0, 0.0, 0.0), vec4(0.0, 1.0, 0.0, 0.0),
                           vec4(0.0, 0.0, 1.0, 0.0), vec4(wsParticlePos, 1.0));
   mat4 model = translation * scaling;
