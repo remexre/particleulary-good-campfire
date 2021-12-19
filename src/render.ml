@@ -23,14 +23,14 @@ let load_obj program model_matrix path : node =
 
 type scene = {
   vao : VAO.t;
-  particle_system : Particle_system.particle_system;
+  particle_system : Particle_system.t;
   mutable opaque_objects : node;
   mutable camera : Camera.t;
   mutable proj_matrix : Mat4.t;
 }
 
-let init_scene (particle_system : Particle_system.particle_system)
-    (camera : Camera.t) : scene =
+let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
+    =
   (* Load the shaders we're going to use. *)
   let vert_default = VertexShader.load "shaders/default" in
   let frag_debug = FragmentShader.load "shaders/debug" in

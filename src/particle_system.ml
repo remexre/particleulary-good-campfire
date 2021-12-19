@@ -1,7 +1,5 @@
-open Particle
-
-type particle_system = {
-  mutable particles: Particle.particle list;
+type t = {
+  mutable particles: Particle.t list;
   mutable start: (float * float * float);
 }
 
@@ -14,7 +12,7 @@ let init (num_particles : int) (s : (float * float * float)) =
                 start = s}
     in ps)
 
-let apply_force_to_all_particles (ps: particle_system) (dir: (float * float * float)) =
+let apply_force_to_all_particles (ps: t) (dir: (float * float * float)) =
   let rec apply_force plst =
     match plst with
       | [] -> ()
@@ -23,22 +21,22 @@ let apply_force_to_all_particles (ps: particle_system) (dir: (float * float * fl
     apply_force ps.particles
     (*List.map (fun p -> Particle.apply_force_to_particle p dir) ps.particles*)
 
-let add_particle (ps: particle_system) =
-  let p : Particle.particle = Particle.init ps.start in
+let add_particle (ps: t) =
+  let p : Particle.t = Particle.init ps.start in
     let newlst = p :: ps.particles in
       ps.particles <- newlst
 
-let rec add_particles (ps: particle_system) (n: int) =
+let rec add_particles (ps: t) (n: int) =
   match n with
     | 0 -> ()
     | _ -> add_particle(ps); add_particles ps (n-1)
 
-let animate (ps : particle_system) = 
-  let rec go (cl : Particle.particle list) (nl : Particle.particle list) =
+let animate (ps : t) = 
+  let rec go (cl : Particle.t list) (nl : Particle.t list) =
     match cl with
       | [] -> nl
       | p::ps -> (Particle.animate p; 
-                  if ((alive(p)) = false) then go ps nl
+                  if not (Particle.alive p) then go ps nl
                   else go ps (p::nl))
   in
   ps.particles <- go ps.particles []
