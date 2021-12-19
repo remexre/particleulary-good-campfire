@@ -1,11 +1,8 @@
-type t = {
-  mutable particles : Particle.t list;
-  mutable start : float * float * float;
-}
+type t = { mutable particles : Particle.t list; mutable start : Vec3.t }
 
-val init : int -> float * float * float -> t
+val init : int -> Vec3.t -> t
 
-val apply_force_to_all_particles : t -> float * float * float -> unit
+val apply_force_to_all_particles : t -> Vec3.t -> unit
 
 val add_particle : t -> unit
 
