@@ -33,9 +33,11 @@ type scene = {
 let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     =
   (* Load the shaders we're going to use. *)
-  let vert_default = VertexShader.load "shaders/default" in
-  let frag_debug = FragmentShader.load "shaders/debug" in
-  let _frag_tex_no_lighting = FragmentShader.load "shaders/tex_no_lighting" in
+  let vert_default = VertexShader.load "assets/shaders/default" in
+  let frag_debug = FragmentShader.load "assets/shaders/debug" in
+  let _frag_tex_no_lighting =
+    FragmentShader.load "assets/shaders/tex_no_lighting"
+  in
   let debug_program = Program.link vert_default frag_debug in
 
   (* Load the objects. *)
