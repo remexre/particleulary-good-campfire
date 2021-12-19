@@ -99,11 +99,10 @@ let separate_groups (groups : 'a list GroupMap.t) : 'a list Seq.t =
   Seq.append explicit_groups implicit_groups
 
 let update_smoothing_group (group : int option)
-    ((mtl, smoothing_groups, current_group, current_group_index) :
-      'b * 'a list GroupMap.t * 'a list * int option) :
-    'b * 'a list GroupMap.t * 'a list * int option =
-  ( mtl,
-    GroupMap.update current_group_index
+    ((smoothing_groups, current_group, current_group_index) :
+      'a list GroupMap.t * 'a list * int option) :
+    'a list GroupMap.t * 'a list * int option =
+  ( GroupMap.update current_group_index
       (Option.some % List.rev_append current_group % Option.value ~default:[])
       smoothing_groups,
     [],
@@ -254,7 +253,7 @@ let faces_of_string obj_path src =
       | _ -> None)
   in
   let open Either in
-  let unnamed_directives, named_directives =
+  let initial_directives, noninitial_directives =
     split_and_group
       (function
         | Face faces ->
@@ -265,43 +264,36 @@ let faces_of_string obj_path src =
                       (index_face_elem positions texcoords normals)
                       faces)))
         | SmoothShading group -> Some (Left (`SmoothShading group))
-        | Object name -> Some (Right name)
-        | UseMTL name -> Some (Left (`UseMTL name))
+        | Object _ -> Some (Right None)
+        | UseMTL name -> Some (Right (Some name))
         | _ -> None)
       directives
   in
-  unnamed_directives :: List.map snd named_directives
-  |> List.map (fun directives ->
+  (None, initial_directives) :: noninitial_directives
+  |> List.map (fun (material_name, directives) ->
+         let material =
+           Option.bind material_name (fun name ->
+               let material = StringMap.find_opt name materials in
+               if Option.is_none material then
+                 Printf.eprintf "Could not find material %S\n" name;
+               material)
+         in
          directives
          |> List.fold_left
-              (fun ( old_mtl,
-                     smoothing_groups,
-                     current_group,
-                     current_group_index ) directive ->
+              (fun (smoothing_groups, current_group, current_group_index)
+                   directive ->
                 match directive with
                 | `Face face ->
-                    ( old_mtl,
-                      smoothing_groups,
+                    ( smoothing_groups,
                       split_to_tris face @ current_group,
                       current_group_index )
                 | `SmoothShading group ->
                     update_smoothing_group group
-                      ( old_mtl,
-                        smoothing_groups,
-                        current_group,
-                        current_group_index )
-                | `UseMTL name ->
-                    let material = StringMap.find_opt name materials in
-                    if Option.is_none material then
-                      Printf.eprintf "Could not find material %S\n" name;
-                    ( material,
-                      smoothing_groups,
-                      current_group,
-                      current_group_index ))
-              (None, GroupMap.empty, [], None)
+                      (smoothing_groups, current_group, current_group_index))
+              (GroupMap.empty, [], None)
          |> update_smoothing_group None
-         |> fun (mtl, smoothing_groups, _, _) ->
-         ( mtl,
+         |> fun (smoothing_groups, _, _) ->
+         ( material,
            smoothing_groups |> separate_groups
            |> Seq.map compute_normals_if_needed
            |> Seq.flat_map List.to_seq |> insert_texcoords_if_needed ))
