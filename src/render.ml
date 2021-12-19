@@ -106,7 +106,6 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
   (* Bind the texture, if there is one. *)
   Option.iter
     (fun texture ->
-      print_endline "tex";
       Gl.active_texture Gl.texture0;
       Gl.bind_texture Gl.texture_2d (Texture.get_handle texture);
       Gl.uniform1i
