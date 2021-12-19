@@ -12,7 +12,7 @@ let find_file : string -> string =
   let rec loop ~(base : string) ~(path : string) =
     let full_path = Filename.concat base path in
     if exists ~path:full_path then full_path
-    else if base = "/" then raise Not_found
+    else if base = "/" then failf "Couldn't find %s" path
     else loop ~base:(Filename.dirname base) ~path
   in
   fun (name : string) ->

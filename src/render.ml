@@ -23,8 +23,6 @@ let load_obj program model_matrix path : node =
 
 type scene = {
   vao : VAO.t;
-  debug_program : Program.t;
-  debug_texture : Texture.t;
   particle_system : Particle_system.particle_system;
   mutable opaque_objects : node;
   mutable camera : Camera.t;
@@ -49,8 +47,6 @@ let init_scene (particle_system : Particle_system.particle_system)
   (* Make the scene. *)
   {
     vao = VAO.make ();
-    debug_program;
-    debug_texture = Texture.load "debug";
     particle_system;
     opaque_objects = Nodes [ campfire ];
     camera;
