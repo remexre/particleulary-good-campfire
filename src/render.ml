@@ -46,14 +46,12 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
   let vert_default = VertexShader.load "assets/shaders/default" in
   let vert_particle = VertexShader.load "assets/shaders/particle" in
   let frag_debug = FragmentShader.load "assets/shaders/debug" in
-  let frag_lighting_no_tex =
-    FragmentShader.load "assets/shaders/lighting_no_tex"
-  in
+  let frag_default = FragmentShader.load "assets/shaders/default" in
   let frag_tex_no_lighting =
     FragmentShader.load "assets/shaders/tex_no_lighting"
   in
   let debug_program = Program.link vert_default frag_debug
-  and no_tex_program = Program.link vert_default frag_lighting_no_tex
+  and default_program = Program.link vert_default frag_default
   and particle_program = Program.link vert_particle frag_debug
   and tex_program = Program.link vert_default frag_tex_no_lighting in
 
@@ -67,7 +65,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 5000.0)
       "assets/rectangle.obj"
   and mushrooms =
-    load_obj no_tex_program
+    load_obj default_program
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 1.0)
       "assets/mushrooms.obj"
   and trees =
@@ -110,9 +108,31 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
         ~far:1000.0;
   }
 
+let bind_float (program : Program.t) (name : string) : float -> unit =
+  let location = Gl.get_uniform_location (Program.get_handle program) name in
+  Gl.uniform1f location
+
 let bind_matrix (program : Program.t) (name : string) : Mat4.t -> unit =
   let location = Gl.get_uniform_location (Program.get_handle program) name in
   Gl.uniform_matrix4fv location 1 false % Mat4.to_bigarray
+
+let bind_tex_opt (program : Program.t) (texture_enum : Gl.enum)
+    (texture_idx : int) ~(name_tex : string) ~(name_has : string) :
+    Texture.t option -> unit =
+  let get_location = Gl.get_uniform_location (Program.get_handle program) in
+  let location_tex = get_location name_tex
+  and location_has = get_location name_has in
+  function
+  | Some texture ->
+      Gl.active_texture texture_enum;
+      Gl.bind_texture Gl.texture_2d (Texture.get_handle texture);
+      Gl.uniform1i location_tex texture_idx;
+      Gl.uniform1i location_has 1
+  | None -> Gl.uniform1i location_has 0
+
+let bind_vec3 (program : Program.t) (name : string) : Vec3.t -> unit =
+  let location = Gl.get_uniform_location (Program.get_handle program) name in
+  fun (x, y, z) -> Gl.uniform3f location x y z
 
 let enable_attrib_with_divisor (program : Program.t) (name : string)
     ~(offset : int) ~(count : int) ~(stride : int) ~(divisor : int) : unit =
@@ -147,14 +167,15 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
   enable_attrib renderable.program "texCoords" ~offset:24 ~count:2 ~stride;
 
   (* Bind the texture, if there is one. *)
-  Option.iter
-    (fun texture ->
-      Gl.active_texture Gl.texture0;
-      Gl.bind_texture Gl.texture_2d (Texture.get_handle texture);
-      Gl.uniform1i
-        (Gl.get_uniform_location (Program.get_handle renderable.program) "tex")
-        0)
-    renderable.material.diffuse_map;
+  bind_tex_opt renderable.program Gl.texture0 0 ~name_tex:"diffuseTex"
+    ~name_has:"hasDiffuseTex" renderable.material.diffuse_map;
+
+  (* Bind the other material parameters. *)
+  bind_vec3 renderable.program "ambient" renderable.material.ambient;
+  bind_vec3 renderable.program "diffuse" renderable.material.diffuse;
+  bind_vec3 renderable.program "specular" renderable.material.specular;
+  bind_float renderable.program "specular_exponent"
+    renderable.material.specular_exponent;
 
   (* Draw the model! *)
   Gl.draw_arrays Gl.triangles 0 (Buffer.length renderable.vbo / 32);
