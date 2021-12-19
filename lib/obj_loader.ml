@@ -291,7 +291,6 @@ let faces_of_string obj_path src =
                         current_group,
                         current_group_index )
                 | `UseMTL name ->
-                    Printf.printf "UseMTL %S\n" name;
                     let material = StringMap.find_opt name materials in
                     if Option.is_none material then
                       Printf.eprintf "Could not find material %S\n" name;

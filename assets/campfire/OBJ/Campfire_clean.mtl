@@ -3,4 +3,4 @@
 # www.zbrush.com
 newmtl defaultMat
 # map_Kd Campfire_clean.bmp
-map_Kd Textures/Optimized/Campfire_MAT_BaseColor_00.jpg
+map_Kd ../Textures/Optimized/Campfire_MAT_BaseColor_00.png

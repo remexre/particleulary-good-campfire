@@ -1,7 +1,8 @@
 open Tgl3
+open Util
 
-let find_file : name:string -> ext:string -> string =
-  let exe_path = Util.realpath ~path:Sys.argv.(0) in
+let find_file : string -> string =
+  let exe_path = realpath ~path:Sys.argv.(0) in
   let exists ~(path : string) : bool =
     try
       let _ = Unix.stat path in
@@ -14,9 +15,9 @@ let find_file : name:string -> ext:string -> string =
     else if base = "/" then raise Not_found
     else loop ~base:(Filename.dirname base) ~path
   in
-  fun ~(name : string) ~(ext : string) ->
-    let path = "assets/" ^ name ^ "." ^ ext in
-    if exists ~path then Util.realpath ~path else loop ~base:exe_path ~path
+  fun (name : string) ->
+    let path = "assets/" ^ name in
+    if exists ~path then realpath ~path else loop ~base:exe_path ~path
 
 module type Asset = sig
   type t
@@ -57,8 +58,8 @@ end = struct
   exception Failed_to_compile_shader of string * string
 
   let load (name : string) : t =
-    let path = find_file ~name ~ext:Kind.ext in
-    let source = Util.read_file_to_string ~path in
+    let path = find_file (name ^ "." ^ Kind.ext) in
+    let source = read_file_to_string ~path in
 
     let handle = Gl.create_shader Kind.id in
     Gl.shader_source handle source;
@@ -174,8 +175,12 @@ end = struct
   let get_handle (_, handle) : int = handle
 
   let load (name : string) : t =
-    let path = find_file ~name ~ext:"png" in
-    let image = ImagePNG.parsefile (ImageUtil_unix.chunk_reader_of_path path) in
+    let path = find_file name in
+    let image =
+      ImageLib.openfile
+        ~extension:(string_tail (Filename.extension name))
+        (ImageUtil_unix.chunk_reader_of_path path)
+    in
 
     let handle = Glutil.get_int (Gl.gen_textures 1) in
     Gl.bind_texture Gl.texture_2d handle;
@@ -186,8 +191,8 @@ end = struct
           Bigarray.Array1.create Bigarray.Int8_unsigned Bigarray.C_layout
             (image.width * image.height * 3)
         in
-        Util.do_iter image.width (fun x ->
-            Util.do_iter image.height (fun y ->
+        do_iter image.width (fun x ->
+            do_iter image.height (fun y ->
                 let i = ((x * image.height) + y) * 3 in
                 Bigarray.Array1.set data (i + 0) r.{x, y};
                 Bigarray.Array1.set data (i + 1) g.{x, y};

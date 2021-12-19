@@ -65,7 +65,7 @@ let finish_state = function
   | Some (name, mat), materials -> StringMap.add name mat materials
   | None, materials -> materials
 
-let update_state (current_material, materials) = function
+let update_state mtl_path (current_material, materials) = function
   | NewMTL name ->
       (Some (name, default_mat), finish_state (current_material, materials))
   | Illum _ ->
@@ -92,11 +92,12 @@ let update_state (current_material, materials) = function
   | IndexOfRefraction _ ->
       Printf.eprintf "Warning: skipping IndexOfRefraction\n";
       (current_material, materials)
-  | MapDiffuseColor path ->
+  | MapDiffuseColor name ->
+      let path = join_paths (Filename.dirname mtl_path) name in
       let texture =
         try Texture.load path
         with exc ->
-          failf "Failed to load texture %S: %s" path (Printexc.to_string exc)
+          failf "Failed to load texture %s: %s" path (Printexc.to_string exc)
       in
 
       let name, mat = Option.get current_material in
@@ -114,5 +115,5 @@ let load_file ~(path : string) =
          String.split_on_char ' ' line
          |> List.filter (( <> ) "")
          |> parse_mtl_directive line)
-  |> Seq.fold_left update_state (None, StringMap.empty)
+  |> Seq.fold_left (update_state path) (None, StringMap.empty)
   |> finish_state

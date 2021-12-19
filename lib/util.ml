@@ -29,6 +29,9 @@ let rec mapM_option f = function
 let or_else (opt : 'a option) (make_default : unit -> 'a option) : 'a option =
   match opt with Some x -> Some x | None -> make_default ()
 
+let string_tail (s : string) : string =
+  String.init (String.length s - 1) (fun i -> String.get s (i + 1))
+
 let unwrap_or_else (opt : 'a option) (make_default : unit -> 'a) : 'a =
   match opt with Some x -> x | None -> make_default ()
 
