@@ -81,7 +81,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
   in
   (* Load the sphere model. *)
   let sphere_vbo =
-    snd (List.nth (Obj_loader.load_file ~path:"assets/sphere.obj") 1)
+    snd (List.hd (Obj_loader.load_file ~path:"assets/sphere.obj"))
   in
 
   (* Make and bind the VAO. *)

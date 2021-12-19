@@ -305,6 +305,7 @@ let faces_of_string obj_path src =
            smoothing_groups |> separate_groups
            |> Seq.map compute_normals_if_needed
            |> Seq.flat_map List.to_seq |> insert_texcoords_if_needed ))
+  |> List.filter (fun (_, faces) -> Array.length faces > 0)
 
 let load_file ~(path : string) =
   List.map
