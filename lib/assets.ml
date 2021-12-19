@@ -189,8 +189,8 @@ end = struct
           Bigarray.Array1.create Bigarray.Int8_unsigned Bigarray.C_layout
             (image.width * image.height * 3)
         in
-        do_iter image.width (fun x ->
-            do_iter image.height (fun y ->
+        dotimes image.width (fun x ->
+            dotimes image.height (fun y ->
                 let i = ((x * image.height) + y) * 3 in
                 Bigarray.Array1.set data (i + 0) r.{x, y};
                 Bigarray.Array1.set data (i + 1) g.{x, y};

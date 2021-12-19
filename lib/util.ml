@@ -6,7 +6,7 @@ let bracket (init : unit -> 'a) (cleanup : 'a -> unit) (body : 'a -> 'b) : 'b =
   let value = init () in
   Fun.protect ~finally:(fun () -> cleanup value) (fun () -> body value)
 
-let do_iter (n : int) (f : int -> unit) : unit =
+let dotimes (n : int) (f : int -> unit) : unit =
   let rec loop (i : int) =
     if i < n then (
       f i;

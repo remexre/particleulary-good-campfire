@@ -6,3 +6,4 @@ Tf 1.00 1.00 1.00
 Ni 1.00
 Ks 1.00 1.00 1.00
 Ns 100.00
+map_Kd ../Textures/Optimized/Campfire_MAT_BaseColor_00.png

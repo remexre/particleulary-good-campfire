@@ -1,33 +1,29 @@
-type t = { mutable particles : Particle.t list; mutable start : Vec3.t }
+type t = { particles : Particle.t DynArr.t; mutable start : Vec3.t }
 
 let init (num_particles : int) (s : Vec3.t) =
-  let rec init_particles (iter : int) lst =
-    if iter = 0 then lst else init_particles (iter - 1) (Particle.init s :: lst)
-  in
-  let ps = { particles = init_particles num_particles []; start = s } in
-  ps
+  {
+    particles =
+      DynArr.init ~capacity:num_particles ~length:num_particles (fun _ ->
+          Particle.init s);
+    start = s;
+  }
 
 let apply_force_to_all_particles (ps : t) (dir : Vec3.t) =
-  List.iter (fun p -> Particle.apply_force_to_particle p dir) ps.particles
+  DynArr.iter (fun p -> Particle.apply_force_to_particle p dir) ps.particles
 
-let add_particle (ps : t) =
-  let p : Particle.t = Particle.init ps.start in
-  let newlst = p :: ps.particles in
-  ps.particles <- newlst
+let add_particle (ps : t) = DynArr.push ps.particles (Particle.init ps.start)
 
-let rec add_particles (ps : t) (n : int) =
-  match n with
-  | 0 -> ()
-  | _ ->
-      add_particle ps;
-      add_particles ps (n - 1)
+let add_particles (ps : t) (n : int) = Util.dotimes n (fun _ -> add_particle ps)
 
 let animate (ps : t) =
-  let rec go (cl : Particle.t list) (nl : Particle.t list) =
-    match cl with
-    | [] -> nl
-    | p :: ps ->
-        Particle.animate p;
-        if not (Particle.alive p) then go ps nl else go ps (p :: nl)
-  in
-  ps.particles <- go ps.particles []
+  DynArr.retain
+    (fun (p : Particle.t) ->
+      Particle.animate p;
+      Particle.alive p)
+    ps.particles
+
+let iter f { particles; _ } = DynArr.iter f particles
+
+let length { particles; _ } = DynArr.length particles
+
+let nth { particles; _ } n = DynArr.get particles n
