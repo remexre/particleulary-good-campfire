@@ -35,7 +35,7 @@ let init (pos : Vec3.t) (window : Window.t) =
   let dir = camera_direction pos in
   let right = camera_right dir in
   let up = Vec3.cross dir right in
-  let front = (0.0, 0.0, 0.0) in
+  let front = (0.0, 0.0, 0.0 -. 1.0) in
   let (w, h) = Window.size ~window in
   let (xpos, ypos) = (Float.of_int (w/2), Float.of_int (h/2)) in
     Window.setCursor ~window xpos ypos;
