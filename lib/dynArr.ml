@@ -40,12 +40,14 @@ let push dynarr x =
   dynarr.storage.(dynarr.len) <- Some x;
   dynarr.len <- dynarr.len + 1
 
-let rec iter_range dynarr f ~lo ~hi =
+let rec iteri_range dynarr f ~lo ~hi =
   if lo < hi then (
-    f (get dynarr lo);
-    iter_range dynarr f ~lo:(lo + 1) ~hi)
+    f lo (get dynarr lo);
+    iteri_range dynarr f ~lo:(lo + 1) ~hi)
 
-let iter f dynarr = iter_range dynarr f ~lo:0 ~hi:(length dynarr)
+let iteri f dynarr = iteri_range dynarr f ~lo:0 ~hi:(length dynarr)
+
+let iter f = iteri (fun _ -> f)
 
 let retain pred dynarr =
   (* We keep two different indices in the main loop, the index of the next

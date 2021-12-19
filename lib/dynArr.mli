@@ -16,5 +16,7 @@ val push : 'a t -> 'a -> unit
 
 val iter : ('a -> unit) -> 'a t -> unit
 
+val iteri : (int -> 'a -> unit) -> 'a t -> unit
+
 (* https://doc.rust-lang.org/nightly/std/vec/struct.Vec.html#method.retain *)
 val retain : ('a -> bool) -> 'a t -> unit
