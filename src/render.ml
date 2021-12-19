@@ -124,6 +124,9 @@ let render (scene : scene) : unit =
   Gl.enable Gl.depth_test;
   Gl.depth_func Gl.less;
 
+  (* Enable MSAA. *)
+  Gl.enable Gl.multisample;
+
   (* Clear the previous frame. *)
   Gl.clear_color 0.0 0.0 0.2 1.0;
   Gl.clear_depth 1.0;
