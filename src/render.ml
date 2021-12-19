@@ -49,6 +49,10 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     load_obj debug_program
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 5000.0)
       "assets/rectangle.obj"
+  and trees =
+    load_obj debug_program
+      Mat4.(translate ~x:(-10.0) ~y:0.0 ~z:(-8.0) * scale_uniform 1.0)
+      "assets/trees.obj"
   in
 
   (* Load the sphere model. *)
@@ -61,7 +65,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     vao = VAO.make ();
     sphere_vbo;
     particle_system;
-    opaque_objects = Nodes [ campfire; ground ];
+    opaque_objects = Nodes [ campfire; ground; trees ];
     camera;
     proj_matrix =
       Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.1
