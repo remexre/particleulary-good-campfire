@@ -47,7 +47,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
       "assets/campfire/OBJ/Campfire.obj"
   and ground =
     load_obj debug_program
-      Mat4.(translate ~x:0.0 ~y:0.0 ~z:(-100.0) * scale_uniform 5000.0)
+      Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 5000.0)
       "assets/rectangle.obj"
   in
 
