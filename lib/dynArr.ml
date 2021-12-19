@@ -31,9 +31,11 @@ let set { storage; len } i x =
   storage.(i) <- Some x
 
 let grow dynarr =
-  dynarr.storage <-
-    Array.init (dynarr.len * 2) (fun i ->
-        if i < dynarr.len then dynarr.storage.(i) else None)
+  if dynarr.len = 0 then dynarr.storage <- Array.make 10 None
+  else
+    dynarr.storage <-
+      Array.init (dynarr.len * 2) (fun i ->
+          if i < dynarr.len then dynarr.storage.(i) else None)
 
 let push dynarr x =
   if Array.length dynarr.storage = dynarr.len then grow dynarr;
