@@ -1,4 +1,4 @@
-#version 330
+#version 330 core
 
 /*
  * In the absence of a stronger type system (e.g. [0]), we use Hungarian

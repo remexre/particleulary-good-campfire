@@ -171,10 +171,10 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
     ~name_has:"hasDiffuseTex" renderable.material.diffuse_map;
 
   (* Bind the other material parameters. *)
-  bind_vec3 renderable.program "ambient" renderable.material.ambient;
-  bind_vec3 renderable.program "diffuse" renderable.material.diffuse;
-  bind_vec3 renderable.program "specular" renderable.material.specular;
-  bind_float renderable.program "specular_exponent"
+  bind_vec3 renderable.program "materialAmbient" renderable.material.ambient;
+  bind_vec3 renderable.program "materialDiffuse" renderable.material.diffuse;
+  bind_vec3 renderable.program "materialSpecular" renderable.material.specular;
+  bind_float renderable.program "specularExponent"
     renderable.material.specular_exponent;
 
   (* Draw the model! *)
