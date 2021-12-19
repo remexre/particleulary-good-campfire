@@ -49,12 +49,22 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     load_obj debug_program
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 5000.0)
       "assets/rectangle.obj"
-  and trees =
-    load_obj debug_program
-      Mat4.(translate ~x:(-10.0) ~y:0.0 ~z:(-8.0) * scale_uniform 1.0)
-      "assets/trees.obj"
+  and conifers =
+    let conifer = "assets/conifer_macedonian_pine/conifer_macedonian_pine.obj" in
+    let trees = [
+      (load_obj debug_program
+        Mat4.(translate ~x:(25.0) ~y:(0.0) ~z:(-1000.0) * scale_uniform (0.005)) conifer);
+      (load_obj debug_program
+        Mat4.(translate ~x:(-400.0) ~y:(0.0) ~z:(-2000.0) * scale_uniform (0.007)) conifer);
+      (load_obj debug_program
+        Mat4.(translate ~x:(700.0) ~y:(0.0) ~z:(-50.0) * scale_uniform (0.01)) conifer);
+      (load_obj debug_program
+        Mat4.(translate ~x:(300.0) ~y:(0.0) ~z:(2000.0) * scale_uniform (0.008)) conifer);
+      (load_obj debug_program
+        Mat4.(translate ~x:(-800.0) ~y:(0.0) ~z:(1500.0) * scale_uniform (0.02)) conifer);
+      ] in
+    Nodes (trees)
   in
-
   (* Load the sphere model. *)
   let sphere_vbo =
     Obj_loader.load_file ~path:"assets/sphere.obj" |> List.hd |> snd
@@ -65,7 +75,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     vao = VAO.make ();
     sphere_vbo;
     particle_system;
-    opaque_objects = Nodes [ campfire; ground; trees ];
+    opaque_objects = Nodes [ campfire; ground; conifers ];
     camera;
     proj_matrix =
       Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.1
