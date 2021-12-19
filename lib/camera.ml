@@ -35,7 +35,7 @@ let init (pos : Vec3.t) (window : Window.t) =
   let dir = camera_direction pos in
   let right = camera_right dir in
   let up = Vec3.cross dir right in
-  let front = (0.0, 0.0, 0.0 -. 1.0) in
+  let front = (0.0, 0.0, 1.0) in
   let (w, h) = Window.size ~window in
   let (xpos, ypos) = (Float.of_int (w/2), Float.of_int (h/2)) in
     Window.setCursor ~window xpos ypos;
@@ -74,8 +74,8 @@ let process_input (c : t) (input : Window.event) (dt : float) =
       match key with
       | GLFW.W -> c.camera_pos <- Vec3.(c.camera_pos + (c.camera_front * speed))
       | GLFW.S -> c.camera_pos <- Vec3.(c.camera_pos - (c.camera_front * speed))
-      | GLFW.A -> c.camera_pos <- Vec3.(c.camera_pos - (c_cfcu * speed))
-      | GLFW.D -> c.camera_pos <- Vec3.(c.camera_pos + (c_cfcu * speed))
+      | GLFW.D -> c.camera_pos <- Vec3.(c.camera_pos - (c_cfcu * speed))
+      | GLFW.A -> c.camera_pos <- Vec3.(c.camera_pos + (c_cfcu * speed))
       | GLFW.LeftShift -> ( match action with
                               GLFW.Press -> c.movement_speed <- c.movement_speed *. 2.0
                               | GLFW.Release -> c.movement_speed <- c.movement_speed *. 0.5
