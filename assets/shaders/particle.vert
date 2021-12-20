@@ -10,6 +10,7 @@ in vec3 wsParticlePos;
 in float particleAge;
 
 out vec2 texCoordsFrag;
+out float particleAgeFrag;
 out vec4 wsNormals;
 
 void main() {
@@ -23,4 +24,5 @@ void main() {
   gl_Position = proj * view * model * vec4(msPosition, 1);
   wsNormals = normalize(model * vec4(msNormals, 0));
   texCoordsFrag = texCoords;
+  particleAgeFrag = particleAge;
 }

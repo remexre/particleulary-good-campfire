@@ -1,6 +1,7 @@
 #version 330
 
 in vec2 texCoordsFrag;
+in float particleAgeFrag;
 in vec4 wsNormals;
 
 out vec4 color;
