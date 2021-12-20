@@ -149,8 +149,27 @@ let disable_attrib (program : Program.t) (name : string) : unit =
   let index = Gl.get_attrib_location (Program.get_handle program) name in
   Gl.disable_vertex_attrib_array index
 
-let render_one (renderable : renderable) (view_matrix : Mat4.t)
-    (proj_matrix : Mat4.t) : unit =
+let make_lighting_ubo (particle_system : Particle_system.t) : Buffer.t * int =
+  let arr = Bigarray.Array1.create Bigarray.Float32 Bigarray.C_layout 1024
+  and particles = Particle_system.get_lighting_particles particle_system in
+  DynArr.iteri
+    (fun i p ->
+      if i < 126 then (
+        let open Particle in
+        let x, y, z = p.pos and intensity = 1.0 and r, g, b = (1.0, 1.0, 1.0) in
+        arr.{i * 4} <- x;
+        arr.{(i * 4) + 1} <- y;
+        arr.{(i * 4) + 2} <- z;
+        arr.{(i * 4) + 3} <- intensity;
+        arr.{(i * 4) + 4} <- r;
+        arr.{(i * 4) + 5} <- g;
+        arr.{(i * 4) + 6} <- b;
+        arr.{(i * 4) + 7} <- 0.0))
+    particles;
+  (Buffer.make_ubo ~name:"Lighting UBO" ~data:arr, DynArr.length particles)
+
+let render_one (renderable : renderable) (lighting_ubo : Buffer.t)
+    (light_count : int) ~(view_matrix : Mat4.t) ~(proj_matrix : Mat4.t) : unit =
   (* Bind the program. *)
   Gl.use_program (Program.get_handle renderable.program);
   (* Bind the MVP matrices. *)
@@ -165,6 +184,24 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
   enable_attrib renderable.program "msPosition" ~offset:0 ~count:3 ~stride;
   enable_attrib renderable.program "msNormals" ~offset:12 ~count:3 ~stride;
   enable_attrib renderable.program "texCoords" ~offset:24 ~count:2 ~stride;
+
+  (* Bind the UBO and bind it to the appropriate block. *)
+  Gl.bind_buffer Gl.uniform_buffer (Buffer.get_handle lighting_ubo);
+  Gl.uniform_block_binding
+    (Program.get_handle renderable.program)
+    (Gl.get_uniform_block_index
+       (Program.get_handle renderable.program)
+       "light_ubo")
+    0;
+  Gl.bind_buffer_range Gl.uniform_buffer 0
+    (Buffer.get_handle lighting_ubo)
+    0
+    (Buffer.length lighting_ubo);
+  Gl.uniform1i
+    (Gl.get_uniform_location
+       (Program.get_handle renderable.program)
+       "lightCount")
+    light_count;
 
   (* Bind the texture, if there is one. *)
   bind_tex_opt renderable.program Gl.texture0 0 ~name_tex:"diffuseTex"
@@ -187,26 +224,31 @@ let render_one (renderable : renderable) (view_matrix : Mat4.t)
 
 let make_particle_system_instance_buffer (camera : Camera.t)
     (particle_system : Particle_system.t) : Buffer.t =
-  (* Sort the particles by depth, so transparency works right. *)
-  Particle_system.sort_by_distance_from particle_system camera.camera_pos;
+  (* Sort the visible particles by depth, so transparency works right. *)
+  Particle_system.sort_visible_by_distance_from particle_system
+    camera.camera_pos;
 
   (* Allocate a CPU-side buffer. For now, the only attributes are the position
    * of the particle and its age, so we need four floats per particle.
    *)
+  let visible_particles =
+    Particle_system.get_visible_particles particle_system
+  in
   let arr =
     Bigarray.Array1.create Bigarray.Float32 Bigarray.C_layout
-      (4 * Particle_system.length particle_system)
+      (4 * DynArr.length visible_particles)
   in
 
   (* Fill in the CPU-side buffer. *)
-  Particle_system.iteri
+  DynArr.iteri
     (fun i p ->
+      let open Particle in
       let x, y, z = p.pos in
       arr.{i * 4} <- x;
       arr.{(i * 4) + 1} <- y;
       arr.{(i * 4) + 2} <- z;
       arr.{(i * 4) + 3} <- p.age)
-    particle_system;
+    visible_particles;
 
   (* Move the buffer to the GPU and return the GPU-side handle. *)
   Buffer.make_static_vbo ~name:"Particle Instance Attributes" ~data:arr
@@ -255,9 +297,12 @@ let render (scene : scene) : unit =
   Gl.clear (Int.logor Gl.color_buffer_bit Gl.depth_buffer_bit);
 
   (* Render the objects other than the particles. *)
-  let view_matrix = Camera.view scene.camera in
+  let lighting_ubo, light_count = make_lighting_ubo scene.particle_system
+  and view_matrix = Camera.view scene.camera in
   each_renderable
-    (fun renderable -> render_one renderable view_matrix scene.proj_matrix)
+    (fun renderable ->
+      render_one renderable lighting_ubo light_count ~view_matrix
+        ~proj_matrix:scene.proj_matrix)
     scene.opaque_objects;
 
   (* Create the VBO with the instance attributes for the particle system. *)

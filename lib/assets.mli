@@ -1,3 +1,5 @@
+open Tgl3
+
 module type Asset = sig
   type t
 
@@ -53,9 +55,16 @@ module Buffer : sig
     (float, Bigarray.float32_elt, Bigarray.c_layout) Bigarray.Array1.t
 
   val make_uninit :
-    kind:string -> name:string -> usage:Tgl3.Gl.enum -> size:int -> t
+    kind:string ->
+    name:string ->
+    target:Gl.enum ->
+    usage:Gl.enum ->
+    size:int ->
+    t
 
   val make_static_vbo : name:string -> data:float_array -> t
+
+  val make_ubo : name:string -> data:float_array -> t
 
   val length : t -> int
 end
