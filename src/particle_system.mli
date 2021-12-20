@@ -8,6 +8,8 @@ val add_particle : t -> unit
 
 val add_particles : t -> int -> unit
 
+val restore_lights : t -> unit
+
 val animate : t -> float -> unit
 
 val get_lighting_particles : t -> Particle.t DynArr.t

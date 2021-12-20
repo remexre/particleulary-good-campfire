@@ -20,12 +20,21 @@ let add_particle (ps : t) = DynArr.push ps.visible (Particle.init ps.center)
 
 let add_particles (ps : t) (n : int) = Util.dotimes n (fun _ -> add_particle ps)
 
+let restore_lights (ps : t) : unit =
+  let n = 128 - DynArr.length ps.lighting in
+  Util.dotimes n (fun _ -> DynArr.push ps.lighting (Particle.init ps.center))
+
 let animate (ps : t) (dt : float) =
   DynArr.retain
     (fun (p : Particle.t) ->
       Particle.animate p dt;
       Particle.alive p)
-    ps.visible
+    ps.visible;
+  DynArr.retain
+    (fun (p : Particle.t) ->
+      Particle.animate p dt;
+      p.age < 0.4)
+    ps.lighting
 
 let get_lighting_particles ps = ps.lighting
 

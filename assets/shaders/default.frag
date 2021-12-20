@@ -35,11 +35,13 @@ void main() {
   for (int i = 0; i < lightCount; i++) {
     vec3 lightDirection =
         normalize(lightUBO.lights[i].position - wsPosition.xyz);
+    // float lightDist = distance(lightUBO.lights[i].position, wsPosition.xyz);
 
     float diffuseIntensity = max(dot(wsNormals.xyz, lightDirection), 0.0);
 
-    totalDiffuseIntensity += diffuseIntensity / 10.0;
+    totalDiffuseIntensity += diffuseIntensity; // lightDist;
   }
+  totalDiffuseIntensity /= lightCount;
   vec3 diffuse = diffuseColor * totalDiffuseIntensity;
 
   vec3 specular = materialSpecular;

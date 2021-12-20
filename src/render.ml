@@ -172,7 +172,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     opaque_objects = Nodes [ campfire; ground; mushrooms; trees ];
     camera;
     proj_matrix =
-      Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.1
+      Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.01
         ~far:1000.0;
   }
 
@@ -312,6 +312,7 @@ let render_one ~(program : Program.t) ~(vbo : Buffer.t)
     (Buffer.get_handle lighting_ubo)
     0
     (Buffer.length lighting_ubo);
+  Printf.printf "light_count = %d\n" light_count;
   Gl.uniform1i
     (Gl.get_uniform_location (Program.get_handle program) "lightCount")
     light_count;
