@@ -66,6 +66,12 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
   and particle_program = Program.link vert_particle frag_particle
   and tex_program = Program.link vert_default frag_tex_no_lighting in
 
+  let rec rand v lim =
+    let r = Random.float v in
+    let x = if r < lim then rand v lim else r in
+    if Random.bool () then x *. 1.0 else x *. -1.0
+  in
+
   (* Load the objects. *)
   let campfire =
     load_obj tex_program
@@ -76,15 +82,32 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 5000.0)
       "assets/rectangle.obj"
   and mushrooms =
-    load_obj default_program
-      Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 1.0)
-      "assets/mushrooms.obj"
-  and trees =
-    let rec rand v =
-      let r = Random.float v in
-      let x = if r < 400.0 then rand v else r in
-      if Random.bool () then x *. 1.0 else x *. -1.0
+    let get_mushroom (fungi_lists : node list list) : node list list =
+      List.map
+        (fun lst -> [ List.nth lst (Random.int (List.length lst)) ])
+        fungi_lists
     in
+    Nodes
+      (List.map
+         (fun n -> Nodes n)
+         (get_mushroom
+            (load_objs_to_objects default_program "assets/mushrooms.obj"
+               [
+                 Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 1.0);
+                 Mat4.(
+                   translate ~x:(rand 5.0 1.0) ~y:0.0 ~z:(rand 2.5 1.0)
+                   * scale_uniform 1.0);
+                 Mat4.(
+                   translate ~x:(rand 2.9 1.0) ~y:0.0 ~z:(rand 2.4 1.0)
+                   * scale_uniform 1.0);
+                 Mat4.(
+                   translate ~x:(rand 2.9 1.0) ~y:0.0 ~z:(rand 3.5 1.0)
+                   * scale_uniform 1.0);
+                 Mat4.(
+                   translate ~x:(rand 2.7 1.0) ~y:0.0 ~z:(rand 2.5 1.0)
+                   * scale_uniform 1.0);
+               ])))
+  and trees =
     let rec scale_tree v =
       let r = Random.float v in
       if r < 0.003 then scale_tree v else r
@@ -95,7 +118,8 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
       | _ ->
           place_trees (n - 1)
             (Mat4.(
-               translate ~x:(rand 4000.0) ~y:(-50.0) ~z:(rand 4000.0)
+               translate ~x:(rand 4000.0 400.0) ~y:(-50.0)
+                 ~z:(rand 4000.0 400.0)
                * scale_uniform (scale_tree 0.05))
             :: lst)
     in
