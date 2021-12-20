@@ -73,7 +73,12 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
   in
 
   (* Load the sky *)
-  (*let faces = ("right.png", "left.png", "top.png", "bottom.png", "front.png", "back.png")*)
+  (*let faces = ("assets/skybox/right.png", 
+               "assets/skybox/left.png", 
+               "assets/skybox/top.png", 
+               "assets/skybox/bottom.png", 
+               "assets/skybox/front.png", 
+               "assets/skybox/back.png")*)
 
   (* Load the objects. *)
   let campfire =
