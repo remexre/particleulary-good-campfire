@@ -246,6 +246,8 @@ module Buffer : sig
 
   val make_ubo : name:string -> data:float_array -> t
 
+  val free : t -> unit
+
   val length : t -> int
 end = struct
   type t = {
@@ -254,6 +256,7 @@ end = struct
     usage : Gl.enum;
     size : int;
     handle : int;
+    mutable freed : bool;
   }
 
   type float_array =
@@ -262,7 +265,9 @@ end = struct
   let to_string { kind; name; handle; _ } : string =
     Printf.sprintf "<%s buffer %d (%s)>" kind handle name
 
-  let get_handle { handle; _ } : int = handle
+  let get_handle { handle; freed; _ } : int =
+    if freed then failwith "Tried to use freed Buffer";
+    handle
 
   let make_uninit ~(kind : string) ~(name : string) ~(target : Gl.enum)
       ~(usage : Gl.enum) ~(size : int) : t =
@@ -270,11 +275,12 @@ end = struct
     Gl.bind_buffer target handle;
     Gl.buffer_data target size None usage;
 
-    let out = { kind; name; usage; size; handle } in
+    let out = { kind; name; usage; size; handle; freed = false } in
     Gc.finalise
       (fun buffer ->
-        Printf.eprintf "freeing %s\n" (to_string buffer);
-        Glutil.set_int (Gl.delete_buffers 1) (get_handle buffer))
+        if not buffer.freed then (
+          Printf.eprintf "freeing %s\n" (to_string buffer);
+          Glutil.set_int (Gl.delete_buffers 1) (get_handle buffer)))
       out;
     out
 
@@ -295,6 +301,10 @@ end = struct
     Gl.bind_buffer target (get_handle buffer);
     Gl.buffer_data target size (Some data) Gl.static_draw;
     buffer
+
+  let free buffer =
+    Glutil.set_int (Gl.delete_buffers 1) (get_handle buffer);
+    buffer.freed <- true
 
   let length { size; _ } = size
 end

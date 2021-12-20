@@ -24,13 +24,13 @@
  * [1]: https://learnopengl.com/Getting-started/Coordinate-Systems
  */
 
-uniform mat4 model;
 uniform mat4 view;
 uniform mat4 proj;
 
 in vec3 msPosition;
 in vec3 msNormals;
 in vec2 texCoords;
+in mat4 model;
 
 // We need to manually specify anything we want to pass to the fragment shader,
 // even if it's a vertex attribute.

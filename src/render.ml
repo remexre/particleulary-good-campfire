@@ -209,59 +209,109 @@ let make_lighting_ubo (particle_system : Particle_system.t) : Buffer.t * int =
     particles;
   (Buffer.make_ubo ~name:"Lighting UBO" ~data:arr, DynArr.length particles)
 
-let render_one (renderable : renderable) (lighting_ubo : Buffer.t)
-    (light_count : int) ~(view_matrix : Mat4.t) ~(proj_matrix : Mat4.t) : unit =
+let make_model_matrix_vbo (model_matrices : Mat4.t DynArr.t) : Buffer.t =
+  let data =
+    Bigarray.Array1.create Bigarray.Float32 Bigarray.C_layout
+      (16 * DynArr.length model_matrices)
+  in
+  DynArr.iteri
+    (fun i
+         ( (x11, x12, x13, x14),
+           (x21, x22, x23, x24),
+           (x31, x32, x33, x34),
+           (x41, x42, x43, x44) ) ->
+      data.{i * 16} <- x11;
+      data.{(i * 16) + 1} <- x12;
+      data.{(i * 16) + 2} <- x13;
+      data.{(i * 16) + 3} <- x14;
+      data.{(i * 16) + 4} <- x21;
+      data.{(i * 16) + 5} <- x22;
+      data.{(i * 16) + 6} <- x23;
+      data.{(i * 16) + 7} <- x24;
+      data.{(i * 16) + 8} <- x31;
+      data.{(i * 16) + 9} <- x32;
+      data.{(i * 16) + 10} <- x33;
+      data.{(i * 16) + 11} <- x34;
+      data.{(i * 16) + 12} <- x41;
+      data.{(i * 16) + 13} <- x42;
+      data.{(i * 16) + 14} <- x43;
+      data.{(i * 16) + 15} <- x44)
+    model_matrices;
+  Buffer.make_static_vbo ~name:"Model Matrix VBO" ~data
+
+let render_one ~(program : Program.t) ~(vbo : Buffer.t)
+    ~(material : Mtl_loader.mat) ~(model_matrices : Mat4.t DynArr.t)
+    ~(lighting_ubo : Buffer.t) ~(light_count : int) ~(view_matrix : Mat4.t)
+    ~(proj_matrix : Mat4.t) : unit =
   (* Bind the program. *)
-  Gl.use_program (Program.get_handle renderable.program);
-  (* Bind the MVP matrices. *)
-  bind_matrix renderable.program "model" renderable.model_matrix;
-  bind_matrix renderable.program "view" view_matrix;
-  bind_matrix renderable.program "proj" proj_matrix;
+  Gl.use_program (Program.get_handle program);
+  (* Bind the view and projection matrices. *)
+  bind_matrix program "view" view_matrix;
+  bind_matrix program "proj" proj_matrix;
 
   (* Bind the VBO. *)
-  Gl.bind_buffer Gl.array_buffer (Buffer.get_handle renderable.vbo);
+  Gl.bind_buffer Gl.array_buffer (Buffer.get_handle vbo);
   (* Enable the attributes and set their offsets. *)
   let stride = 32 in
-  enable_attrib renderable.program "msPosition" ~offset:0 ~count:3 ~stride;
-  enable_attrib renderable.program "msNormals" ~offset:12 ~count:3 ~stride;
-  enable_attrib renderable.program "texCoords" ~offset:24 ~count:2 ~stride;
+  enable_attrib program "msPosition" ~offset:0 ~count:3 ~stride;
+  enable_attrib program "msNormals" ~offset:12 ~count:3 ~stride;
+  enable_attrib program "texCoords" ~offset:24 ~count:2 ~stride;
+
+  (* Create and bind the model matrix VBO. *)
+  let model_matrix_vbo = make_model_matrix_vbo model_matrices in
+  Gl.bind_buffer Gl.array_buffer (Buffer.get_handle model_matrix_vbo);
+  Printf.printf "len = %d\n" (Buffer.length model_matrix_vbo);
+
+  (let index = Gl.get_attrib_location (Program.get_handle program) "model" in
+   Gl.enable_vertex_attrib_array index;
+   Gl.vertex_attrib_pointer index 4 Gl.float false 64 (`Offset 0);
+   Gl.vertex_attrib_divisor index 1;
+   Gl.enable_vertex_attrib_array (index + 1);
+   Gl.vertex_attrib_pointer (index + 1) 4 Gl.float false 64 (`Offset 16);
+   Gl.vertex_attrib_divisor (index + 1) 1;
+   Gl.enable_vertex_attrib_array (index + 2);
+   Gl.vertex_attrib_pointer (index + 2) 4 Gl.float false 64 (`Offset 32);
+   Gl.vertex_attrib_divisor (index + 2) 1;
+   Gl.enable_vertex_attrib_array (index + 3);
+   Gl.vertex_attrib_pointer (index + 3) 4 Gl.float false 64 (`Offset 48);
+   Gl.vertex_attrib_divisor (index + 3) 1);
 
   (* Bind the UBO and bind it to the appropriate block. *)
   Gl.bind_buffer Gl.uniform_buffer (Buffer.get_handle lighting_ubo);
   Gl.uniform_block_binding
-    (Program.get_handle renderable.program)
-    (Gl.get_uniform_block_index
-       (Program.get_handle renderable.program)
-       "light_ubo")
+    (Program.get_handle program)
+    (Gl.get_uniform_block_index (Program.get_handle program) "light_ubo")
     0;
   Gl.bind_buffer_range Gl.uniform_buffer 0
     (Buffer.get_handle lighting_ubo)
     0
     (Buffer.length lighting_ubo);
   Gl.uniform1i
-    (Gl.get_uniform_location
-       (Program.get_handle renderable.program)
-       "lightCount")
+    (Gl.get_uniform_location (Program.get_handle program) "lightCount")
     light_count;
 
   (* Bind the texture, if there is one. *)
-  bind_tex_opt renderable.program Gl.texture0 0 ~name_tex:"diffuseTex"
-    ~name_has:"hasDiffuseTex" renderable.material.diffuse_map;
+  bind_tex_opt program Gl.texture0 0 ~name_tex:"diffuseTex"
+    ~name_has:"hasDiffuseTex" material.diffuse_map;
 
   (* Bind the other material parameters. *)
-  bind_vec3 renderable.program "materialAmbient" renderable.material.ambient;
-  bind_vec3 renderable.program "materialDiffuse" renderable.material.diffuse;
-  bind_vec3 renderable.program "materialSpecular" renderable.material.specular;
-  bind_float renderable.program "specularExponent"
-    renderable.material.specular_exponent;
+  bind_vec3 program "materialAmbient" material.ambient;
+  bind_vec3 program "materialDiffuse" material.diffuse;
+  bind_vec3 program "materialSpecular" material.specular;
+  bind_float program "specularExponent" material.specular_exponent;
 
   (* Draw the model! *)
-  Gl.draw_arrays Gl.triangles 0 (Buffer.length renderable.vbo / 32);
+  Gl.draw_arrays_instanced Gl.triangles 0
+    (Buffer.length vbo / 32)
+    (DynArr.length model_matrices);
+
+  (* Keep the VBO alive till here. *)
+  Buffer.free model_matrix_vbo;
 
   (* Disable the attributes. *)
-  disable_attrib renderable.program "msPosition";
-  disable_attrib renderable.program "msNormals";
-  disable_attrib renderable.program "texCoords"
+  disable_attrib program "msPosition";
+  disable_attrib program "msNormals";
+  disable_attrib program "texCoords"
 
 let make_particle_system_instance_buffer (camera : Camera.t)
     (particle_system : Particle_system.t) : Buffer.t =
@@ -329,6 +379,29 @@ let render_particles (program : Program.t) ~(sphere_vbo : Buffer.t)
   disable_attrib program "wsParticlePos";
   disable_attrib program "particleAge"
 
+module InstanceMap = Map.Make (struct
+  type t = Program.t * Buffer.t * Mtl_loader.mat
+
+  let compare = compare
+end)
+
+let collect_instances (root : node) : Mat4.t DynArr.t InstanceMap.t =
+  let map = ref InstanceMap.empty in
+  each_renderable
+    (fun renderable ->
+      map :=
+        InstanceMap.update
+          (renderable.program, renderable.vbo, renderable.material)
+          (fun old ->
+            let old =
+              match old with Some arr -> arr | None -> DynArr.make ~capacity:1
+            in
+            DynArr.push old renderable.model_matrix;
+            Some old)
+          !map)
+    root;
+  !map
+
 let render (scene : scene) : unit =
   VAO.bind scene.vao;
 
@@ -338,14 +411,14 @@ let render (scene : scene) : unit =
   Gl.clear (Int.logor Gl.color_buffer_bit Gl.depth_buffer_bit);
 
   (* Render the objects other than the particles. *)
+  Gl.blend_func Gl.one Gl.zero;
   let lighting_ubo, light_count = make_lighting_ubo scene.particle_system
   and view_matrix = Camera.view scene.camera in
-  Gl.blend_func Gl.one Gl.zero;
-  each_renderable
-    (fun renderable ->
-      render_one renderable lighting_ubo light_count ~view_matrix
-        ~proj_matrix:scene.proj_matrix)
-    scene.opaque_objects;
+  collect_instances scene.opaque_objects
+  |> InstanceMap.to_seq
+  |> Seq.iter (fun ((program, vbo, material), model_matrices) ->
+         render_one ~program ~vbo ~material ~model_matrices ~lighting_ubo
+           ~light_count ~view_matrix ~proj_matrix:scene.proj_matrix);
 
   (* Create the VBO with the instance attributes for the particle system. *)
   let particle_instance_attrs =

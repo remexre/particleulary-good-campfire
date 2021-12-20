@@ -66,6 +66,8 @@ module Buffer : sig
 
   val make_ubo : name:string -> data:float_array -> t
 
+  val free : t -> unit
+
   val length : t -> int
 end
 
