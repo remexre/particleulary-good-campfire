@@ -257,66 +257,81 @@ let faces_of_string obj_path src =
   let initial_directives, noninitial_directives =
     split_and_group
       (function
-        | Face faces ->
-            Some
-              (Left
-                 (`Face
-                   (List.map
-                      (index_face_elem positions texcoords normals)
-                      faces)))
-        | SmoothShading group -> Some (Left (`SmoothShading group))
-        | Object _ -> Some (Right None)
-        | UseMTL name -> Some (Right (Some name))
+        | Face face_elements ->
+            let face =
+              `Face
+                (List.map
+                   (index_face_elem positions texcoords normals)
+                   face_elements)
+            in
+            Some (Left (Some (Left face)))
+        | SmoothShading group ->
+            Some (Left (Some (Left (`SmoothShading group))))
+        | Object name -> Some (Right (Some name))
+        | UseMTL name -> Some (Left (Some (Right (Some name))))
         | _ -> None)
       directives
   in
   (None, initial_directives) :: noninitial_directives
-  |> List.map (fun (material_name, directives) ->
-         let material =
-           Option.bind material_name (fun name ->
-               let material = StringMap.find_opt name materials in
-               if Option.is_none material then
-                 Printf.eprintf "Could not find material %S\n" name;
-               material)
+  |> List.map (fun (name, directives) ->
+         let initial_directives, noninitial_directives =
+           split_and_group id (List.to_seq directives)
          in
-         directives
-         |> List.fold_left
-              (fun (smoothing_groups, current_group, current_group_index)
-                   directive ->
-                match directive with
-                | `Face face ->
-                    ( smoothing_groups,
-                      split_to_tris face @ current_group,
-                      current_group_index )
-                | `SmoothShading group ->
-                    update_smoothing_group group
-                      (smoothing_groups, current_group, current_group_index))
-              (GroupMap.empty, [], None)
-         |> update_smoothing_group None
-         |> fun (smoothing_groups, _, _) ->
-         ( material,
-           smoothing_groups |> separate_groups
-           |> Seq.map compute_normals_if_needed
-           |> Seq.flat_map List.to_seq |> insert_texcoords_if_needed ))
-  |> List.filter (fun (_, faces) -> Array.length faces > 0)
+         (None, initial_directives) :: noninitial_directives
+         |> List.map (fun (material_name, directives) ->
+                let material =
+                  Option.bind material_name (fun name ->
+                      let material = StringMap.find_opt name materials in
+                      if Option.is_none material then
+                        Printf.eprintf "Could not find material %S\n" name;
+                      material)
+                in
+                directives
+                |> List.fold_left
+                     (fun (smoothing_groups, current_group, current_group_index)
+                          directive ->
+                       match directive with
+                       | `Face face ->
+                           ( smoothing_groups,
+                             split_to_tris face @ current_group,
+                             current_group_index )
+                       | `SmoothShading group ->
+                           update_smoothing_group group
+                             ( smoothing_groups,
+                               current_group,
+                               current_group_index ))
+                     (GroupMap.empty, [], None)
+                |> update_smoothing_group None
+                |> fun (smoothing_groups, _, _) ->
+                ( material,
+                  smoothing_groups |> separate_groups
+                  |> Seq.map compute_normals_if_needed
+                  |> Seq.flat_map List.to_seq |> insert_texcoords_if_needed ))
+         |> List.filter (fun (_, faces) -> Array.length faces > 0)
+         |> fun meshes -> (name, meshes))
+  |> List.filter (fun (_, meshes) -> meshes <> [])
 
 let load_file ~(path : string) =
   List.map
-    (fun (mtl, faces) ->
-      Array.to_seq faces
-      |> Seq.flat_map
-           (fun
-             {
-               positions = p1, p2, p3;
-               texcoords = t1, t2, t3;
-               normals = n1, n2, n3;
-             }
-           -> List.to_seq [ (p1, t1, n1); (p2, t2, n2); (p3, t3, n3) ])
-      |> Seq.flat_map (fun ((px, py, pz), (tu, tv), (nx, ny, nz)) ->
-             List.to_seq [ px; py; pz; nx; ny; nz; tu; tv ])
-      |> Array.of_seq
-      |> Bigarray.Array1.of_array Bigarray.Float32 Bigarray.C_layout
-      |> fun data ->
-      ( Option.value mtl ~default:Mtl_loader.default_mat,
-        Assets.Buffer.make_static_vbo ~name:path ~data ))
+    (fun (name, meshes) ->
+      ( name,
+        List.map
+          (fun (mtl, faces) ->
+            Array.to_seq faces
+            |> Seq.flat_map
+                 (fun
+                   {
+                     positions = p1, p2, p3;
+                     texcoords = t1, t2, t3;
+                     normals = n1, n2, n3;
+                   }
+                 -> List.to_seq [ (p1, t1, n1); (p2, t2, n2); (p3, t3, n3) ])
+            |> Seq.flat_map (fun ((px, py, pz), (tu, tv), (nx, ny, nz)) ->
+                   List.to_seq [ px; py; pz; nx; ny; nz; tu; tv ])
+            |> Array.of_seq
+            |> Bigarray.Array1.of_array Bigarray.Float32 Bigarray.C_layout
+            |> fun data ->
+            ( Option.value mtl ~default:Mtl_loader.default_mat,
+              Assets.Buffer.make_static_vbo ~name:path ~data ))
+          meshes ))
     (faces_of_string path (Util.read_file_to_string ~path))

@@ -16,15 +16,19 @@ let rec each_renderable (f : renderable -> unit) = function
   | Nodes subnodes -> List.iter (each_renderable f) subnodes
 
 let load_objs program path model_matrices : node =
-  let mats_and_vbos = Obj_loader.load_file ~path in
+  let obj_file = Obj_loader.load_file ~path in
   Nodes
     (List.map
        (fun model_matrix ->
          Nodes
            (List.map
-              (fun (material, vbo) ->
-                One { program; vbo; material; model_matrix })
-              mats_and_vbos))
+              (fun (_name, meshes) ->
+                Nodes
+                  (List.map
+                     (fun (material, vbo) ->
+                       One { program; vbo; material; model_matrix })
+                     meshes))
+              obj_file))
        model_matrices)
 
 let load_obj program model_matrix path : node =
@@ -100,7 +104,8 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
   in
   (* Load the sphere model. *)
   let sphere_vbo =
-    snd (List.hd (Obj_loader.load_file ~path:"assets/sphere.obj"))
+    Obj_loader.load_file ~path:"assets/sphere.obj"
+    |> List.hd |> snd |> List.hd |> snd
   in
 
   (* Make and bind the VAO. *)
