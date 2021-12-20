@@ -15,10 +15,9 @@ let rec each_renderable (f : renderable -> unit) = function
   | One renderable -> f renderable
   | Nodes subnodes -> List.iter (each_renderable f) subnodes
 
-let load_objs program path model_matrices : node =
+let load_objs_to_objects program path model_matrices : node list =
   let obj_file = Obj_loader.load_file ~path in
-  Nodes
-    (List.map
+    List.map
        (fun model_matrix ->
          Nodes
            (List.map
@@ -29,7 +28,10 @@ let load_objs program path model_matrices : node =
                        One { program; vbo; material; model_matrix })
                      meshes))
               obj_file))
-       model_matrices)
+       model_matrices
+
+let load_objs program path model_matrices : node =
+  Nodes (load_objs_to_objects program path model_matrices)
 
 let load_obj program model_matrix path : node =
   load_objs program path [ model_matrix ]
