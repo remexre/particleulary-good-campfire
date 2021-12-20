@@ -302,7 +302,7 @@ let render (scene : scene) : unit =
   VAO.bind scene.vao;
 
   (* Clear the previous frame. *)
-  Gl.clear_color 0.0 0.0 0.2 1.0;
+  Gl.clear_color 0.01 0.0 0.1 1.0;
   Gl.clear_depth 1.0;
   Gl.clear (Int.logor Gl.color_buffer_bit Gl.depth_buffer_bit);
 
