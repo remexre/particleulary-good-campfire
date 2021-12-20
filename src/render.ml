@@ -227,11 +227,13 @@ let make_lighting_ubo (particle_system : Particle_system.t) : Buffer.t * int =
   and particles = Particle_system.get_lighting_particles particle_system in
   DynArr.iteri
     (fun i p ->
-      if i < 126 then (
+      if i < 128 then (
         let open Particle in
-        let x, y, z = p.pos and intensity = 1.0 and r, g, b = (1.0, 1.0, 1.0) in
+        let x, y, z = p.pos
+        and intensity = (-25.0 *. p.age *. p.age) +. (10.0 *. p.age)
+        and r, g, b = (1.0, 1.0, 1.0) in
         arr.{i * 8} <- x;
-        arr.{(i * 8) + 1} <- y;
+        arr.{(i * 8) + 1} <- y +. 1.0;
         arr.{(i * 8) + 2} <- z;
         arr.{(i * 8) + 3} <- intensity;
         arr.{(i * 8) + 4} <- r;
@@ -239,7 +241,8 @@ let make_lighting_ubo (particle_system : Particle_system.t) : Buffer.t * int =
         arr.{(i * 8) + 6} <- b;
         arr.{(i * 8) + 7} <- 0.0))
     particles;
-  (Buffer.make_ubo ~name:"Lighting UBO" ~data:arr, DynArr.length particles)
+  ( Buffer.make_ubo ~name:"Lighting UBO" ~data:arr,
+    min (DynArr.length particles) 128 )
 
 let make_model_matrix_vbo (model_matrices : Mat4.t DynArr.t) : Buffer.t =
   let data =

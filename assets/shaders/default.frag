@@ -23,7 +23,7 @@ in vec4 wsNormals;
 
 out vec4 color;
 
-const float ambientLight = 1.0;
+const float ambientLight = 0.1;
 
 void main() {
   vec3 diffuseColor = (hasDiffuseTex != 0)
@@ -33,13 +33,14 @@ void main() {
 
   float totalDiffuseIntensity = 0.0;
   for (int i = 0; i < lightCount; i++) {
-    vec3 lightDirection =
-        normalize(lightUBO.lights[i].position - wsPosition.xyz);
-    float lightDist = distance(lightUBO.lights[i].position, wsPosition.xyz);
-
-    float diffuseIntensity = max(dot(wsNormals.xyz, lightDirection), 0.1);
-
-    totalDiffuseIntensity += diffuseIntensity / max(lightDist, 0.1);
+    light light = lightUBO.lights[i];
+    float lightDist = distance(light.position, wsPosition.xyz);
+    if (lightDist > 0.0001) {
+      vec3 lightDirection = normalize(light.position - wsPosition.xyz);
+      float diffuseIntensity = dot(wsNormals.xyz, lightDirection);
+      totalDiffuseIntensity +=
+          light.intensity * diffuseIntensity / (lightDist * lightDist);
+    }
   }
   totalDiffuseIntensity /= lightCount;
   vec3 diffuse = diffuseColor * totalDiffuseIntensity;
