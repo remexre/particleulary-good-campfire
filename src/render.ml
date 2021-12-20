@@ -52,7 +52,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
   let frag_tex_no_lighting =
     FragmentShader.load "assets/shaders/tex_no_lighting"
   in
-  let debug_program = Program.link vert_default frag_debug
+  let _debug_program = Program.link vert_default frag_debug
   and default_program = Program.link vert_default frag_default
   and ground_program = Program.link vert_default frag_ground
   and particle_program = Program.link vert_particle frag_particle
@@ -72,7 +72,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 1.0)
       "assets/mushrooms.obj"
   and trees =
-    load_objs debug_program
+    load_objs default_program
       "assets/conifer_macedonian_pine/conifer_macedonian_pine.obj"
       [
         Mat4.(translate ~x:25.0 ~y:0.0 ~z:(-1000.0) * scale_uniform 0.005);

@@ -23,20 +23,22 @@ in vec4 wsNormals;
 
 out vec4 color;
 
-const float ambientLight = 0.1;
+const float ambientLight = 1.0;
 
 void main() {
-  vec3 ambient = materialAmbient * ambientLight;
 
   vec3 diffuseColor = (hasDiffuseTex != 0)
                           ? texture(diffuseTex, texCoordsFrag).rgb
                           : materialDiffuse;
+  vec3 ambient = diffuseColor * ambientLight;
   float totalDiffuseIntensity = 0.0;
   for (int i = 0; i < lightCount; i++) {
-    vec3 fragToLight = lightUBO.lights[i].position - wsPosition.xyz;
+    vec3 lightDirection =
+        normalize(lightUBO.lights[i].position - wsPosition.xyz);
 
-    totalDiffuseIntensity +=
-        clamp(dot(normalize(fragToLight), wsNormals.xyz), 0.0, 1.0);
+    float diffuseIntensity = max(dot(wsNormals.xyz, lightDirection), 0.0);
+
+    totalDiffuseIntensity += diffuseIntensity / 10.0;
   }
   vec3 diffuse = diffuseColor * totalDiffuseIntensity;
 
