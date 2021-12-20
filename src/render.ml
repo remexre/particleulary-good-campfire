@@ -72,15 +72,31 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 1.0)
       "assets/mushrooms.obj"
   and trees =
+    let rec rand v =
+      let r = Random.float v in
+      let x = if (r < 400.0) then rand v else r in
+      if (Random.bool ()) then
+        x *. 1.0 else x *. -1.0 in
+    let rec scale_tree v = 
+      let r = Random.float v in
+      if (r < 0.003) then scale_tree v else r in
+    let rec place_trees n (lst : (Mat4.t list)) = (match n with
+      0 -> lst
+      | _ -> (place_trees (n - 1) ((Mat4.(translate ~x:(rand 4000.0) 
+                                                  ~y:(-50.0) 
+                                                  ~z:(rand 4000.0) * 
+              scale_uniform (scale_tree 0.05)) :: lst))))
+    in
     load_objs default_program
       "assets/conifer_macedonian_pine/conifer_macedonian_pine.obj"
-      [
-        Mat4.(translate ~x:25.0 ~y:0.0 ~z:(-1000.0) * scale_uniform 0.005);
-        Mat4.(translate ~x:(-400.0) ~y:0.0 ~z:(-2000.0) * scale_uniform 0.007);
-        Mat4.(translate ~x:700.0 ~y:0.0 ~z:(-50.0) * scale_uniform 0.01);
-        Mat4.(translate ~x:300.0 ~y:0.0 ~z:2000.0 * scale_uniform 0.008);
-        Mat4.(translate ~x:(-800.0) ~y:0.0 ~z:1500.0 * scale_uniform 0.02);
-      ]
+      ([
+        Mat4.(translate ~x:25.0 ~y:(-50.0) ~z:(-1000.0) * scale_uniform 0.005);
+        Mat4.(translate ~x:(-400.0) ~y:(-50.0) ~z:(-2000.0) * scale_uniform 0.007);
+        Mat4.(translate ~x:700.0 ~y:(-50.0) ~z:(-50.0) * scale_uniform 0.01);
+        Mat4.(translate ~x:300.0 ~y:(-50.0) ~z:2000.0 * scale_uniform 0.008);
+        Mat4.(translate ~x:(-800.0) ~y:(-50.0) ~z:1500.0 * scale_uniform 0.02);
+        Mat4.(translate ~x:(-300.0) ~y:(-50.0) ~z:40.0 * scale_uniform 0.005);
+      ] @ (place_trees 50 []))
   in
   (* Load the sphere model. *)
   let sphere_vbo =
