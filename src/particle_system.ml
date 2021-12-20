@@ -33,5 +33,5 @@ let get_visible_particles ps = ps.visible
 
 let sort_visible_by_distance_from { visible; _ } from =
   DynArr.sort_by_key
-    (fun (p : Particle.t) -> Vec3.(magnitude2 (p.pos - from)))
+    (fun (p : Particle.t) -> Vec3.(-.magnitude2 (p.pos - from)))
     visible
