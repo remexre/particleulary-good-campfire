@@ -16,7 +16,6 @@ let mtls =
   List.map
     (Util.join_paths assets_dir)
     [
-      "Pine4m/_.obj/Pine_4m.mtl";
       "campfire/OBJ/Campfire.mtl";
       "campfire/OBJ/Campfire_clean.mtl";
       "mushrooms.mtl";
