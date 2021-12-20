@@ -72,6 +72,9 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     if Random.bool () then x *. 1.0 else x *. -1.0
   in
 
+  (* Load the sky *)
+  (*let faces = ("right.png", "left.png", "top.png", "bottom.png", "front.png", "back.png")*)
+
   (* Load the objects. *)
   let campfire =
     load_obj tex_program
