@@ -99,6 +99,10 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
   (* Enable MSAA. *)
   Gl.enable Gl.multisample;
 
+  (* Enable face culling. *)
+  Gl.enable Gl.cull_face_enum;
+  Gl.cull_face Gl.back;
+
   (* Make the scene. *)
   {
     vao;
