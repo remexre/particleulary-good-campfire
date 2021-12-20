@@ -80,6 +80,6 @@ let size ~(window : t) : int * int =
   let window, _ = window in
   GLFW.getWindowSize ~window
 
-let setCursor ~(window : t) xpos ypos : unit =
+let set_cursor ~(window : t) ~xpos ~ypos : unit =
   let window, _ = window in
   GLFW.setCursorPos ~window ~xpos ~ypos
