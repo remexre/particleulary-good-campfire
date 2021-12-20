@@ -15,11 +15,10 @@ let rec each_renderable (f : renderable -> unit) = function
   | One renderable -> f renderable
   | Nodes subnodes -> List.iter (each_renderable f) subnodes
 
-let load_objs_to_objects program path model_matrices : node list =
+let load_objs_to_objects program path model_matrices : node list list =
   let obj_file = Obj_loader.load_file ~path in
     List.map
        (fun model_matrix ->
-         Nodes
            (List.map
               (fun (_name, meshes) ->
                 Nodes
@@ -31,7 +30,8 @@ let load_objs_to_objects program path model_matrices : node list =
        model_matrices
 
 let load_objs program path model_matrices : node =
-  Nodes (load_objs_to_objects program path model_matrices)
+  Nodes (List.map (fun n -> Nodes n) 
+    (load_objs_to_objects program path model_matrices))
 
 let load_obj program model_matrix path : node =
   load_objs program path [ model_matrix ]
@@ -74,9 +74,9 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 5000.0)
       "assets/rectangle.obj"
   and mushrooms =
-    load_obj default_program
+    (load_obj default_program
       Mat4.(translate ~x:0.0 ~y:0.0 ~z:0.0 * scale_uniform 1.0)
-      "assets/mushrooms.obj"
+      "assets/mushrooms.obj")
   and trees =
     let rec rand v =
       let r = Random.float v in
