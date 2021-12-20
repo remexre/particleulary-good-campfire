@@ -26,23 +26,23 @@ out vec4 color;
 const float ambientLight = 1.0;
 
 void main() {
-
   vec3 diffuseColor = (hasDiffuseTex != 0)
                           ? texture(diffuseTex, texCoordsFrag).rgb
                           : materialDiffuse;
   vec3 ambient = diffuseColor * ambientLight;
+
   float totalDiffuseIntensity = 0.0;
   for (int i = 0; i < lightCount; i++) {
     vec3 lightDirection =
         normalize(lightUBO.lights[i].position - wsPosition.xyz);
+    float lightDist = distance(lightUBO.lights[i].position, wsPosition.xyz);
 
-    float diffuseIntensity = max(dot(wsNormals.xyz, lightDirection), 0.0);
+    float diffuseIntensity = max(dot(wsNormals.xyz, lightDirection), 0.1);
 
-    totalDiffuseIntensity += diffuseIntensity / 10.0;
+    totalDiffuseIntensity += diffuseIntensity / max(lightDist, 0.1);
   }
+  totalDiffuseIntensity /= lightCount;
   vec3 diffuse = diffuseColor * totalDiffuseIntensity;
-
-  vec3 specular = materialSpecular;
 
   color = vec4(ambient + diffuse, 1.0);
 }

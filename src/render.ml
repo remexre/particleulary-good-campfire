@@ -177,7 +177,7 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
     opaque_objects = Nodes [ campfire; ground; mushrooms; trees ];
     camera;
     proj_matrix =
-      Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.1
+      Mat4.perspective ~fovy:(Float.pi /. 2.0) ~aspect:(16.0 /. 9.0) ~near:0.01
         ~far:1000.0;
   }
 
@@ -230,14 +230,14 @@ let make_lighting_ubo (particle_system : Particle_system.t) : Buffer.t * int =
       if i < 126 then (
         let open Particle in
         let x, y, z = p.pos and intensity = 1.0 and r, g, b = (1.0, 1.0, 1.0) in
-        arr.{i * 4} <- x;
-        arr.{(i * 4) + 1} <- y;
-        arr.{(i * 4) + 2} <- z;
-        arr.{(i * 4) + 3} <- intensity;
-        arr.{(i * 4) + 4} <- r;
-        arr.{(i * 4) + 5} <- g;
-        arr.{(i * 4) + 6} <- b;
-        arr.{(i * 4) + 7} <- 0.0))
+        arr.{i * 8} <- x;
+        arr.{(i * 8) + 1} <- y;
+        arr.{(i * 8) + 2} <- z;
+        arr.{(i * 8) + 3} <- intensity;
+        arr.{(i * 8) + 4} <- r;
+        arr.{(i * 8) + 5} <- g;
+        arr.{(i * 8) + 6} <- b;
+        arr.{(i * 8) + 7} <- 0.0))
     particles;
   (Buffer.make_ubo ~name:"Lighting UBO" ~data:arr, DynArr.length particles)
 
@@ -317,6 +317,7 @@ let render_one ~(program : Program.t) ~(vbo : Buffer.t)
     (Buffer.get_handle lighting_ubo)
     0
     (Buffer.length lighting_ubo);
+  Printf.printf "light_count = %d\n" light_count;
   Gl.uniform1i
     (Gl.get_uniform_location (Program.get_handle program) "lightCount")
     light_count;
