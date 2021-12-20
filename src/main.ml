@@ -8,8 +8,7 @@ let main () : unit =
       let particle_system = Particle_system.init (0.0, 0.0, -1.0) in
       let scene = Render.init_scene particle_system camera in
       Window.loop ~window (fun dt events ->
-          (* TODO: Actually handle input events! For now, we just print how many there were. *)
-          List.iter (fun e -> Camera.process_input camera e dt) events;
+          Camera.process_events camera events dt;
 
           (* TODO: Physics update *)
           let dir = (0.0, 0.05, 0.0) in
