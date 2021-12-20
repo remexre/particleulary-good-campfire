@@ -93,6 +93,9 @@ let init_scene (particle_system : Particle_system.t) (camera : Camera.t) : scene
   Gl.enable Gl.depth_test;
   Gl.depth_func Gl.less;
 
+  (* Enable transparent objects. *)
+  Gl.enable Gl.blend;
+
   (* Enable MSAA. *)
   Gl.enable Gl.multisample;
 
@@ -300,6 +303,7 @@ let render (scene : scene) : unit =
   (* Render the objects other than the particles. *)
   let lighting_ubo, light_count = make_lighting_ubo scene.particle_system
   and view_matrix = Camera.view scene.camera in
+  Gl.blend_func Gl.one Gl.zero;
   each_renderable
     (fun renderable ->
       render_one renderable lighting_ubo light_count ~view_matrix
@@ -312,6 +316,7 @@ let render (scene : scene) : unit =
   in
 
   (* Render the particles. *)
+  Gl.blend_func Gl.src_alpha Gl.one_minus_src_alpha;
   render_particles scene.particle_program ~sphere_vbo:scene.sphere_vbo
     ~instance_attrs:particle_instance_attrs ~view_matrix
     ~proj_matrix:scene.proj_matrix
