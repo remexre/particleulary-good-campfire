@@ -30,7 +30,7 @@ let update (p : t) (dt : float) =
   let vnx, vny, vnz = p.vel in
   p.pos <- (px +. (vnx *. dt), py +. (vny *. dt), pz +. (vnz *. dt));
   (*update age*)
-  p.age <- p.age +. 2.0;
+  p.age <- p.age +. dt;
   (*reset acceleration*)
   p.acc <- (0.0, 0.0, 0.0)
 
