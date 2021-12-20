@@ -8,7 +8,7 @@ val add_particle : t -> unit
 
 val add_particles : t -> int -> unit
 
-val animate : t -> unit
+val animate : t -> float -> unit
 
 val iteri : (int -> Particle.t -> unit) -> t -> unit
 

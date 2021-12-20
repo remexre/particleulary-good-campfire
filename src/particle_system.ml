@@ -15,10 +15,10 @@ let add_particle (ps : t) = DynArr.push ps.particles (Particle.init ps.start)
 
 let add_particles (ps : t) (n : int) = Util.dotimes n (fun _ -> add_particle ps)
 
-let animate (ps : t) =
+let animate (ps : t) (dt : float) =
   DynArr.retain
     (fun (p : Particle.t) ->
-      Particle.animate p;
+      Particle.animate p dt;
       Particle.alive p)
     ps.particles
 
