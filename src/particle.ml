@@ -14,7 +14,7 @@ let init (p : Vec3.t) =
       pos = p;
       vel =
         ( (rand 2.0) *. 0.1,
-          (rand 2.0) *. 0.9,
+          (rand 5.0) *. 0.2,
           (rand 2.0) *. -0.1);
       acc = Vec3.zero;
       age = 0.0;
@@ -45,4 +45,4 @@ let animate (p : t) (dt : float) = update p dt
 (*TO DO: render an individual t*)
 (*let render (p : t) =*)
 
-let alive (p : t) = if p.age >= 150.0 then false else true
+let alive (p : t) = if p.age >= 200.0 then false else true
