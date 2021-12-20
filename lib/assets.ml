@@ -215,9 +215,17 @@ module Buffer : sig
   type float_array =
     (float, Bigarray.float32_elt, Bigarray.c_layout) Bigarray.Array1.t
 
-  val make_uninit : kind:string -> name:string -> usage:Gl.enum -> size:int -> t
+  val make_uninit :
+    kind:string ->
+    name:string ->
+    target:Gl.enum ->
+    usage:Gl.enum ->
+    size:int ->
+    t
 
   val make_static_vbo : name:string -> data:float_array -> t
+
+  val make_ubo : name:string -> data:float_array -> t
 
   val length : t -> int
 end = struct
@@ -237,11 +245,11 @@ end = struct
 
   let get_handle { handle; _ } : int = handle
 
-  let make_uninit ~(kind : string) ~(name : string) ~(usage : Gl.enum)
-      ~(size : int) : t =
+  let make_uninit ~(kind : string) ~(name : string) ~(target : Gl.enum)
+      ~(usage : Gl.enum) ~(size : int) : t =
     let handle = Glutil.get_int (Gl.gen_buffers 1) in
-    Gl.bind_buffer Gl.array_buffer handle;
-    Gl.buffer_data Gl.array_buffer size None usage;
+    Gl.bind_buffer target handle;
+    Gl.buffer_data target size None usage;
 
     let out = { kind; name; usage; size; handle } in
     Gc.finalise
@@ -252,10 +260,21 @@ end = struct
     out
 
   let make_static_vbo ~(name : string) ~(data : float_array) : t =
-    let size = 4 * Bigarray.Array1.dim data in
-    let buffer = make_uninit ~kind:"vertex" ~name ~usage:Gl.static_draw ~size in
-    Gl.bind_buffer Gl.array_buffer (get_handle buffer);
-    Gl.buffer_data Gl.array_buffer size (Some data) Gl.static_draw;
+    let size = 4 * Bigarray.Array1.dim data and target = Gl.array_buffer in
+    let buffer =
+      make_uninit ~kind:"vertex" ~name ~target ~usage:Gl.static_draw ~size
+    in
+    Gl.bind_buffer target (get_handle buffer);
+    Gl.buffer_data target size (Some data) Gl.static_draw;
+    buffer
+
+  let make_ubo ~(name : string) ~(data : float_array) : t =
+    let size = 4 * Bigarray.Array1.dim data and target = Gl.uniform_buffer in
+    let buffer =
+      make_uninit ~kind:"uniform" ~name ~target ~usage:Gl.static_draw ~size
+    in
+    Gl.bind_buffer target (get_handle buffer);
+    Gl.buffer_data target size (Some data) Gl.static_draw;
     buffer
 
   let length { size; _ } = size

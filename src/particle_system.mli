@@ -1,6 +1,6 @@
 type t
 
-val init : int -> Vec3.t -> t
+val init : Vec3.t -> t
 
 val apply_force_to_all_particles : t -> Vec3.t -> unit
 
@@ -10,8 +10,8 @@ val add_particles : t -> int -> unit
 
 val animate : t -> unit
 
-val iteri : (int -> Particle.t -> unit) -> t -> unit
+val get_lighting_particles : t -> Particle.t DynArr.t
 
-val length : t -> int
+val get_visible_particles : t -> Particle.t DynArr.t
 
-val sort_by_distance_from : t -> Vec3.t -> unit
+val sort_visible_by_distance_from : t -> Vec3.t -> unit

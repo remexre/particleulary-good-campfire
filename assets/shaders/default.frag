@@ -14,7 +14,7 @@ struct light {
   vec3 color;
 };
 uniform int lightCount;
-uniform light_ubo { light lights[128]; }
+layout(std140) uniform light_ubo { light lights[128]; }
 lightUBO;
 
 in vec2 texCoordsFrag;
