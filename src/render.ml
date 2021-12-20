@@ -284,7 +284,6 @@ let render_one ~(program : Program.t) ~(vbo : Buffer.t)
   (* Create and bind the model matrix VBO. *)
   let model_matrix_vbo = make_model_matrix_vbo model_matrices in
   Gl.bind_buffer Gl.array_buffer (Buffer.get_handle model_matrix_vbo);
-  Printf.printf "len = %d\n" (Buffer.length model_matrix_vbo);
 
   (let index = Gl.get_attrib_location (Program.get_handle program) "model" in
    Gl.enable_vertex_attrib_array index;
@@ -443,6 +442,7 @@ let render (scene : scene) : unit =
   |> Seq.iter (fun ((program, vbo, material), model_matrices) ->
          render_one ~program ~vbo ~material ~model_matrices ~lighting_ubo
            ~light_count ~view_matrix ~proj_matrix:scene.proj_matrix);
+  Buffer.free lighting_ubo;
 
   (* Create the VBO with the instance attributes for the particle system. *)
   let particle_instance_attrs =
@@ -453,4 +453,5 @@ let render (scene : scene) : unit =
   Gl.blend_func Gl.src_alpha Gl.one_minus_src_alpha;
   render_particles scene.particle_program ~sphere_vbo:scene.sphere_vbo
     ~instance_attrs:particle_instance_attrs ~view_matrix
-    ~proj_matrix:scene.proj_matrix
+    ~proj_matrix:scene.proj_matrix;
+  Buffer.free particle_instance_attrs
