@@ -12,10 +12,10 @@ let main () : unit =
           List.iter (fun e -> Camera.process_input camera e dt) events;
 
           (* TODO: Physics update *)
-          let dir = (0.0, 0.05, 0.0) in
+          let dir = (0.005, 0.005, -0.005) in
           Particle_system.apply_force_to_all_particles particle_system dir;
           Particle_system.animate particle_system dt;
-          Particle_system.add_particles particle_system 2;
+          Particle_system.add_particles particle_system 200;
 
           Render.render scene))
 

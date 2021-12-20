@@ -6,13 +6,16 @@ type t = {
 }
 
 let init (p : Vec3.t) =
+  let rand v =
+    let b = Random.bool () in
+    if (b) then (Random.float v) else (Random.float (0.0-.v)) in
   let np =
     {
       pos = p;
       vel =
-        ( (Random.float 4.0) *. 0.3,
-          (Random.float 4.0) *. 0.3,
-          (Random.float 4.0) *. 0.3 -. 1.0);
+        ( (rand 1.0) *. 0.1,
+          (rand 1.0) *. 0.9,
+          (rand 1.0) *. -0.1);
       acc = Vec3.zero;
       age = 0.0;
     }
