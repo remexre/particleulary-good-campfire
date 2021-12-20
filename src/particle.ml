@@ -13,9 +13,9 @@ let init (p : Vec3.t) =
     {
       pos = p;
       vel =
-        ( (rand 1.0) *. 0.1,
-          (rand 1.0) *. 0.9,
-          (rand 1.0) *. -0.1);
+        ( (rand 2.0) *. 0.1,
+          (rand 2.0) *. 0.9,
+          (rand 2.0) *. -0.1);
       acc = Vec3.zero;
       age = 0.0;
     }

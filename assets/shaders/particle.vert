@@ -14,7 +14,7 @@ out float particleAgeFrag;
 out vec4 wsNormals;
 
 void main() {
-  float size = 0.01;
+  float size = 0.05;
   mat4 scaling = mat4(vec4(size, 0.0, 0.0, 0.0), vec4(0.0, size, 0.0, 0.0),
                       vec4(0.0, 0.0, size, 0.0), vec4(0.0, 0.0, 0.0, 1.0));
   mat4 translation = mat4(vec4(1.0, 0.0, 0.0, 0.0), vec4(0.0, 1.0, 0.0, 0.0),

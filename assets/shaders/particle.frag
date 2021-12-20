@@ -11,7 +11,7 @@ vec4 colorParticle () {
   vec3 goldenPoppy = vec3((250.0/255.0), (192.0/255.0), 0.0);
   vec3 barnRed = vec3(128.0/255.0, 17.0/255.0, 0.0);
 
-  float smokeAge = 35.0;
+  float smokeAge = 30.0;
 
   if (particleAgeFrag < smokeAge) {
     vec3 c = ((barnRed - goldenPoppy) * (particleAgeFrag/smokeAge)) + goldenPoppy;
