@@ -6,21 +6,15 @@ type t = {
 }
 
 let init (p : Vec3.t) =
-  let rand v =
-    let b = Random.bool () in
-    if (b) then (Random.float v) else (Random.float (0.0-.v)) in
-  let np =
-    {
-      pos = p;
-      vel =
-        ( (rand 2.0) *. 0.1,
-          (rand 5.0) *. 0.2,
-          (rand 2.0) *. -0.1);
-      acc = Vec3.zero;
-      age = 0.0;
-    }
-  in
-  np
+  {
+    pos = p;
+    vel =
+      ( Random.float 4.0 *. 0.3,
+        Random.float 4.0 *. 0.3,
+        (Random.float 4.0 *. 0.3) -. 1.0 );
+    acc = Vec3.zero;
+    age = 0.0;
+  }
 
 let apply_force_to_particle (p : t) (f : Vec3.t) =
   let x, y, z = p.acc in
@@ -45,4 +39,4 @@ let animate (p : t) (dt : float) = update p dt
 (*TO DO: render an individual t*)
 (*let render (p : t) =*)
 
-let alive (p : t) = if p.age >= 200.0 then false else true
+let alive (p : t) = p.age < 500.0

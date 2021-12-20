@@ -168,7 +168,7 @@ module Vec3Map = Map.Make (struct
 end)
 
 let compute_face_normal (v1 : Vec3.t) (v2 : Vec3.t) (v3 : Vec3.t) : Vec3.t =
-  Vec3.(cross (v1 - v2) (v1 - v3))
+  Vec3.(cross (v2 - v1) (v1 - v3))
 
 let compute_normals
     (faces :
