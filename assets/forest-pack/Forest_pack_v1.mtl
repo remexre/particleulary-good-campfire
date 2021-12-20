@@ -42,8 +42,8 @@ newmtl Floor_Grass_v1_2
 	Kd 0.588235 0.588235 0.588235
 	Ks 0.000000 0.000000 0.000000
 	Ke 0.000000 0.000000 0.000000
-	map_Ka Floor_Grass_v1_2.tga
-	map_Kd Floor_Grass_v1_2.tga
+	map_Ka Floor_Grass_v1_2.png
+	map_Kd Floor_Grass_v1_2.png
 
 newmtl Floor_Grass_v1_1
 	Ns 9.999999
@@ -56,8 +56,8 @@ newmtl Floor_Grass_v1_1
 	Kd 0.588235 0.588235 0.588235
 	Ks 0.000000 0.000000 0.000000
 	Ke 0.000000 0.000000 0.000000
-	map_Ka Floor_Grass_v1_1.tga
-	map_Kd Floor_Grass_v1_1.tga
+	map_Ka Floor_Grass_v1_1.png
+	map_Kd Floor_Grass_v1_1.png
 
 newmtl Grass_v5
 	Ns 9.999999

@@ -198,6 +198,25 @@ end = struct
         Gl.tex_image2d Gl.texture_2d 0 Gl.rgb image.width image.height 0 Gl.rgb
           Gl.unsigned_byte (`Data data);
         Gl.generate_mipmap Gl.texture_2d
+    | Image.RGBA
+        ( Image.Pixmap.Pix8 r,
+          Image.Pixmap.Pix8 g,
+          Image.Pixmap.Pix8 b,
+          Image.Pixmap.Pix8 a ) ->
+        let data =
+          Bigarray.Array1.create Bigarray.Int8_unsigned Bigarray.C_layout
+            (image.width * image.height * 4)
+        in
+        dotimes image.width (fun x ->
+            dotimes image.height (fun y ->
+                let i = ((x * image.height) + y) * 4 in
+                Bigarray.Array1.set data (i + 0) r.{x, y};
+                Bigarray.Array1.set data (i + 1) g.{x, y};
+                Bigarray.Array1.set data (i + 2) b.{x, y};
+                Bigarray.Array1.set data (i + 3) a.{x, y}));
+        Gl.tex_image2d Gl.texture_2d 0 Gl.rgba image.width image.height 0 Gl.rgb
+          Gl.unsigned_byte (`Data data);
+        Gl.generate_mipmap Gl.texture_2d
     | _ -> failwith "unsupported image type");
 
     let out = (path, handle) in

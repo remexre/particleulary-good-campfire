@@ -55,7 +55,8 @@ let parse_obj_directive obj_path line =
       | [ "vn"; x; y; z ] ->
           Some
             (Normal (Float.of_string x, Float.of_string y, Float.of_string z))
-      | [ "vt"; s; t ] -> Some (Texcoord (Float.of_string s, Float.of_string t))
+      | [ "vt"; s; t ] | [ "vt"; s; t; _ ] ->
+          Some (Texcoord (Float.of_string s, Float.of_string t))
       | [ "g"; name ] -> Some (Group name)
       | [ "o"; name ] -> Some (Object name)
       | [ "mtllib"; name ] ->

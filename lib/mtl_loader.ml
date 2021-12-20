@@ -13,7 +13,9 @@ type mtl_directive =
   | Dissolve of float
   | TransmissionFilter of float * float * float
   | IndexOfRefraction of float
+  | MapAmbientColor of string
   | MapDiffuseColor of string
+  | MapDissolve of string
   | EmissiveColor of float * float * float
 
 let parse_mtl_directive line =
@@ -31,11 +33,14 @@ let parse_mtl_directive line =
           SpecularColor (Float.of_string r, Float.of_string g, Float.of_string b)
       | [ "Ns"; k ] -> SpecularExponent (Float.of_string k)
       | [ "d"; d ] -> Dissolve (Float.of_string d)
+      | [ "Tr"; tr ] -> Dissolve (1.0 -. Float.of_string tr)
       | [ "Tf"; x; y; z ] ->
           TransmissionFilter
             (Float.of_string x, Float.of_string y, Float.of_string z)
       | [ "Ni"; ior ] -> IndexOfRefraction (Float.of_string ior)
+      | [ "map_Ka"; path ] -> MapAmbientColor path
       | [ "map_Kd"; path ] -> MapDiffuseColor path
+      | [ "map_d"; path ] -> MapDissolve path
       | [ "Ke"; r; g; b ] ->
           EmissiveColor (Float.of_string r, Float.of_string g, Float.of_string b)
       | _ -> failf "Unknown MTL directive %S" line
@@ -46,6 +51,7 @@ let parse_mtl_directive line =
 
 type mat = {
   ambient : float * float * float;
+  ambient_map : Texture.t option;
   diffuse : float * float * float;
   diffuse_map : Texture.t option;
   specular : float * float * float;
@@ -55,6 +61,7 @@ type mat = {
 let default_mat =
   {
     ambient = (0.0, 0.0, 0.0);
+    ambient_map = None;
     diffuse = (0.0, 0.0, 0.0);
     diffuse_map = None;
     specular = (0.0, 0.0, 0.0);
@@ -92,16 +99,31 @@ let update_state mtl_path (current_material, materials) = function
   | IndexOfRefraction _ ->
       Printf.eprintf "Warning: skipping IndexOfRefraction\n";
       (current_material, materials)
+  | MapAmbientColor name ->
+      let path = join_paths (Filename.dirname mtl_path) name in
+      let texture =
+        try Texture.load path
+        with exc ->
+          failf "Failed to load ambient map %s: %s" path
+            (Printexc.to_string exc)
+      in
+
+      let name, mat = Option.get current_material in
+      (Some (name, { mat with ambient_map = Some texture }), materials)
   | MapDiffuseColor name ->
       let path = join_paths (Filename.dirname mtl_path) name in
       let texture =
         try Texture.load path
         with exc ->
-          failf "Failed to load texture %s: %s" path (Printexc.to_string exc)
+          failf "Failed to load diffuse map %s: %s" path
+            (Printexc.to_string exc)
       in
 
       let name, mat = Option.get current_material in
       (Some (name, { mat with diffuse_map = Some texture }), materials)
+  | MapDissolve _ ->
+      Printf.eprintf "Warning: skipping MapDissolve\n";
+      (current_material, materials)
   | EmissiveColor _ ->
       Printf.eprintf "Warning: skipping EmissiveColor\n";
       (current_material, materials)

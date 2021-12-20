@@ -4,10 +4,12 @@ let objs =
   List.map
     (Util.join_paths assets_dir)
     [
-      (* "Pine4m/_.obj/Pine_4m.obj"; *)
       "campfire/OBJ/Campfire.obj";
       "campfire/OBJ/Campfire_clean.OBJ";
+      "conifer_macedonian_pine/conifer_macedonian_pine.obj";
+      "forest-pack/Forest_pack_v1.obj";
       "mushrooms.obj";
+      "rectangle.obj";
       "sphere.obj";
       "trees.obj";
     ]
@@ -18,6 +20,7 @@ let mtls =
     [
       "campfire/OBJ/Campfire.mtl";
       "campfire/OBJ/Campfire_clean.mtl";
+      "forest-pack/Forest_pack_v1.mtl";
       "mushrooms.mtl";
       "trees.mtl";
     ]

@@ -3,6 +3,7 @@ open Util
 
 type mat = {
   ambient : float * float * float;
+  ambient_map : Texture.t option;
   diffuse : float * float * float;
   diffuse_map : Texture.t option;
   specular : float * float * float;
