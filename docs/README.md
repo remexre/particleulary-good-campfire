@@ -12,16 +12,12 @@
 ## TO DO:
 
 The report should:
-* Demonstrate the final state of your project
 * Discuss the key algorithms and approaches you used. What were the computational bottlenecks
 to your approach? What would be the limiting factor to scaling up 10x or 100x bigger than what
 you turned in?
 * Address any of the specific questions outlined above for the project you choose
 * Summarize the feedback you got from your peers during the progress report and discussed in
 what ways (if any) you addressed this feedback for the final version.
-* Highlight the relationship between your work (or the methods used by the tools you employed)
-and the state-of-the-art both seen in the papers you saw in your related work search and
-discussed elsewhere in class.
 * Suggest some directions the project could be extended in the future. What are the limitations of
 your current versions and how might you get pass them if given more time?
 
@@ -35,6 +31,26 @@ implement in class, we also need to:
 * Explicitly discuss the connection between your topic and topics from the course
 * For one of the aspects of your demo, discuss what the related state-of-the-art techniques are
 and discuss how the methods used by your code or tools related to the state-of-the-art.
+
+## Our work and the state of the art
+
+A common state-of-the-art approach for animating fire and/or smoke appears to 
+be the use of fluid dynamics (i.e., the Navier-Stokes Equations) for simulating 
+flow. In contrast, we chose to use a particle system, in part because it seemed much 
+simpler to implement and did not require us to have such a firm grasp of fluid
+dynamics. Additionally, we thought it might be interesting to see how convincing
+we could make our particle system when compared with more realistic simulations
+using Navier-Stokes.
+
+In practice, it seems that particle systems are a little more common for 
+simulating fire and smoke. However, it is also common for existing libraries
+for game development to use billboarding techniques to avoid the cost of
+rendering 3D simulations. This is true of approaches that use a particle system
+and of approaches that use fluid dynamics for simulating fire and smoke. In this
+sense, we differ from both state-of-the-art and practical implementations: we
+do not use billboarding techniques as is often done in practice, and we also 
+chose to use a particle system unlike the state-of-the-art techniques that use
+fluid dynamics. 
 
 ## Code
 
