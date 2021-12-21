@@ -9,22 +9,6 @@
 
 <video controls width="100%"><source src="https://cdn.remexre.xyz/files/a926fd22ba1da695671c6aa42e2838812736c9d6.mp4" type="video/mp4"></video>
 
-## TO DO:
-
-The report should:
-* Address any of the specific questions outlined above for the project you choose
-* Suggest some directions the project could be extended in the future. What are the limitations of
-your current versions and how might you get pass them if given more time?
-
-This report or webpage should be written in complete sentences (e.g., no bullet points).
-Additionally, the report should be well structured (e.g., section headers), and should make use of
-figures, images, and videos to help convey the key ideas.
-
-Since we chose to do option 4 (i.e. implementing an animation technique we didn't)
-implement in class, we also need to:
-
-* Explicitly discuss the connection between your topic and topics from the course
-
 ## Key Algorithms
 
 Our fire simulation was created using a particle system, the physics for which
@@ -154,6 +138,21 @@ Roughly estimating (since we didn't go through the trouble of modifying the OCam
 As it turns out, our simulation was originally keeping particles alive until `t=500`; after lowering this to `t=4`, we're easily able to increase the rate of particle generation by a factor of 25-50 before dropping below the "console gaming is just as good as PC" line (30fps).
 At that point, however, the bottleneck appears to still be the CPU (tested on an Intel i7-6700K and a NVIDIA GeForce RTX 3080 Ti).
 Since the CPU is 8-thread and the problem is embarassingly parallel, a roughly 16-32x increase in the number of particles ought to be possible.
+
+## Future work
+
+There are several things we would like to do to extend this work. This includes:
+
+* Enhancing the scene by making the ground less flat and more "ground-like", 
+adding some kind of skybox, texturing the trees, etc.
+* Adding shadows from the smoke and other objects in the scene
+* Perhaps using a heat map to change the color and/or transparency of our
+particles rather than just using their age
+* Allowing the fire to expand or die out over time
+
+We would also consider re-implementing this scene using fluid dynamics rather
+than a particle system. It might be interesting to compare the computational
+overhead of these two methods and see which performs better.
 
 ## Feedback from our peers
 
