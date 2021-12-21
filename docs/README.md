@@ -9,6 +9,12 @@
 
 <video controls width="100%"><source src="https://cdn.remexre.xyz/files/a926fd22ba1da695671c6aa42e2838812736c9d6.mp4" type="video/mp4"></video>
 
+| **Component**      | **Timestamps** |
+| ----------- | ----------- |
+| Particle system with coloring & transparency | whole video |
+| 3D Simulation | whole video |
+| Camera | 0:00 - 0:30, changes in camera angle and position |
+
 ## Key Algorithms
 
 Our fire simulation was created using a particle system, the physics for which
