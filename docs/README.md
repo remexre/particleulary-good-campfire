@@ -210,5 +210,8 @@ TO DO: Share code repo w/ Prof. Guy & Dan
 * campfire
   * https://www.cgtrader.com/free-3d-models/exterior/landscape/campfire-03629b01-7d0f-45fc-8466-ff748e13732e
 
-Code?
-=======
+### Code:
+
+* 2D Simplex Noise
+  * Used in making the ground appear somewhat less shiny
+  * https://thebookofshaders.com/edit.php#11/2d-snoise-clear.frag
