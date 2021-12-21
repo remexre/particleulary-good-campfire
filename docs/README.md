@@ -3,7 +3,7 @@
 ## Group
 
 * Alexandra Hanson (hans7203)
-* Nathan Ringo ()
+* Nathan Ringo (ringo025)
 
 ## Simulation: A particle-ulary good campfire
 
@@ -97,7 +97,7 @@ vmovlps     %xmm0, (%rdi)
 I suspect the missing ingredients are:
 
 - Better escape analysis, to know that pointer-comparison isn't used on the tuple at any point.
-  (This would probably require LTO, but that's fine.)
+  (This would probably require link-time optimization, but that's fine.)
 - Tuple unboxing.
   This would let us represent the tuple as three separate fields, as long as we know pointer-comparison isn't used on the tuple (see above).
 - Write barrier elision for value types.
@@ -127,9 +127,6 @@ Since the CPU is 8-thread and the problem is embarassingly parallel, a roughly 1
 ## TO DO:
 
 The report should:
-* Discuss the key algorithms and approaches you used. What were the computational bottlenecks
-to your approach? What would be the limiting factor to scaling up 10x or 100x bigger than what
-you turned in?
 * Address any of the specific questions outlined above for the project you choose
 * Suggest some directions the project could be extended in the future. What are the limitations of
 your current versions and how might you get pass them if given more time?
@@ -176,6 +173,10 @@ sense, we differ from both state-of-the-art and practical implementations: we
 do not use billboarding techniques as is often done in practice, and we also 
 chose to use a particle system unlike the state-of-the-art techniques that use
 fluid dynamics.
+
+Our transparency also used non-SOTA techniques, but this lead to an overall better artistic effect.
+Rather than using depth peeling or a more modern technique for implementing order-independent transparency, we simply sort particles by depth.
+As mentioned above, this results in the fire shapes being more organic, since they're often partially occuluded by smoke particles, so it was a net win for the artistic and aesthetic appeal of the project.
 
 ### TO DO:
 
