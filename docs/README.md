@@ -34,7 +34,7 @@ vector for acceleration that remains constant over time (this acts like a
 constant "wind" on the smoke, blowing it upwards toward the sky). The fine-tuning
 of our parameters was crucial to this project, and the combination of mathematical 
 intuition, physics, and recognition of aesthetic serendipities necessary to do so
-was honed by prior coursework and greatly influenced by the material covered in
+was honed by the 5611 coursework and greatly influenced by the material covered in
 this class.
 
 The rendering of the fire and smoke used a bunch of instanced spheres, with handtuned functions controlling the size and color of the particle. This size is computed by `min(sqrt(age * 0.08), age)`.
