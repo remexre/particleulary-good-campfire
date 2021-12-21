@@ -31,3 +31,20 @@ implement in class, we also need to:
 * Explicitly discuss the connection between your topic and topics from the course
 * For one of the aspects of your demo, discuss what the related state-of-the-art techniques are
 and discuss how the methods used by your code or tools related to the state-of-the-art.
+
+## Code
+
+TO DO: Share code repo w/ Prof. Guy & Dan
+
+## Credit
+
+### Objects:
+
+* Conifer macedonian pine
+  * https://www.cgtrader.com/free-3d-models/plant/conifer/conifer-macedonian-pine
+* mushrooms.obj / mushrooms.mtl
+  * https://www.cgtrader.com/free-3d-models/plant/other/low-poly-small-mushrooms-set
+* campfire
+  * https://www.cgtrader.com/free-3d-models/exterior/landscape/campfire-03629b01-7d0f-45fc-8466-ff748e13732e
+
+Code?
