@@ -214,7 +214,12 @@ Our code is publicly accessible at the following link: [https://github.com/remex
 * 2D Simplex Noise
   * Used in making the ground appear somewhat less shiny
   * https://thebookofshaders.com/edit.php#11/2d-snoise-clear.frag
-
 * Camera
   * Used as an inital attempt at a camera (this has changed greatly)
   * https://learnopengl.com/Getting-started/Camera
+* [TGLS](https://erratique.ch/software/tgls)
+  * OpenGL bindings for OCaml
+* [glfw-ocaml](https://github.com/SylvainBoilard/GLFW-OCaml)
+  * GLFW bindings for OCaml
+* [imagelib](https://github.com/rlepigre/ocaml-imagelib)
+  * Image loading for OCaml
