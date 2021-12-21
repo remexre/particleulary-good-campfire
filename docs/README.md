@@ -9,19 +9,50 @@
 
 <video controls width="100%"><source src="https://cdn.remexre.xyz/files/a926fd22ba1da695671c6aa42e2838812736c9d6.mp4" type="video/mp4"></video>
 
+## TO DO:
+
+The report should:
+* Address any of the specific questions outlined above for the project you choose
+* Suggest some directions the project could be extended in the future. What are the limitations of
+your current versions and how might you get pass them if given more time?
+
+This report or webpage should be written in complete sentences (e.g., no bullet points).
+Additionally, the report should be well structured (e.g., section headers), and should make use of
+figures, images, and videos to help convey the key ideas.
+
+Since we chose to do option 4 (i.e. implementing an animation technique we didn't)
+implement in class, we also need to:
+
+* Explicitly discuss the connection between your topic and topics from the course
+
 ## Key Algorithms
 
-The physics for the particle system was done more or less the standard way we covered in class.
-We keep track of a particle's position and velocity and use a vector for acceleration
-that remains constant over time (this acts like a constant "wind" on the smoke).
-The rendering of the fire and smoke used a bunch of instanced spheres, with handtuned functions controlling the size and color of the particle.
+Our fire simulation was created using a particle system, the physics for which
+was implemented more or less the standard way we covered in class. For the
+simulation, we keep track of a particle's position and velocity and use a 
+vector for acceleration that remains constant over time (this acts like a 
+constant "wind" on the smoke, blowing it upwards toward the sky). The fine-tuning
+of our parameters was crucial to this project, and the combination of mathematical 
+intuition, physics, and recognition of aesthetic serendipities necessary to do so
+was honed by prior coursework and greatly influenced by the material covered in
+this class.
 
-The size is computed by `min(sqrt(age * 0.08), age)`.
+The rendering of the fire and smoke used a bunch of instanced spheres, with handtuned functions controlling the size and color of the particle. This size is computed by `min(sqrt(age * 0.08), age)`.
 This results in a particle that grows at a fixed rate until `t=0.08`, at which point it rapidly grows, slowing its growth over time as it "disperses".
 This effect is strengthened by a fade-out, where the opacity simply linearly decreases, becoming fully transparent at `t=4`.
 After that time, the particle is destroyed.
 
 Though this is relatively simple, it produces quite good effects, since the smoke is dense enough that smoke spheres are able to occlude fire spheres (despite depth-sorting), producing fairly organic fire shapes.
+
+Adjacent to the material covered in this course, it is of note that because we
+implemented this simulation from scratch in `OCaml`, we also implemented a great
+deal of the library code we used (i.e. all of the code from source in `/lib`,
+all the way from the asset and object file handling to the camera and mat4). 
+This of course was based on existing open-source libraries in other languages, 
+but porting these computations over to `OCaml` presented an additional fun 
+challenge.
+
+### Computational bottlenecks
 
 The main computation bottleneck was honestly OCaml; until OCaml gets multicore support ("coming soon" in 2014, "coming soon" in 2021), there's a hard upper limit on the number of particle updates that can be done.
 However, looking at the generated assembly for the core loop of the physics calculation, we'd significantly benefit from better floating-point code generation in general.
@@ -124,22 +155,6 @@ As it turns out, our simulation was originally keeping particles alive until `t=
 At that point, however, the bottleneck appears to still be the CPU (tested on an Intel i7-6700K and a NVIDIA GeForce RTX 3080 Ti).
 Since the CPU is 8-thread and the problem is embarassingly parallel, a roughly 16-32x increase in the number of particles ought to be possible.
 
-## TO DO:
-
-The report should:
-* Address any of the specific questions outlined above for the project you choose
-* Suggest some directions the project could be extended in the future. What are the limitations of
-your current versions and how might you get pass them if given more time?
-
-This report or webpage should be written in complete sentences (e.g., no bullet points).
-Additionally, the report should be well structured (e.g., section headers), and should make use of
-figures, images, and videos to help convey the key ideas.
-
-Since we chose to do option 4 (i.e. implementing an animation technique we didn't)
-implement in class, we also need to:
-
-* Explicitly discuss the connection between your topic and topics from the course
-
 ## Feedback from our peers
 
 At the time we shared our work with our peers during the progress report, we did
@@ -174,14 +189,11 @@ do not use billboarding techniques as is often done in practice, and we also
 chose to use a particle system unlike the state-of-the-art techniques that use
 fluid dynamics.
 
+### Methods used by our code and its relation to SOTA
+
 Our transparency also used non-SOTA techniques, but this lead to an overall better artistic effect.
 Rather than using depth peeling or a more modern technique for implementing order-independent transparency, we simply sort particles by depth.
 As mentioned above, this results in the fire shapes being more organic, since they're often partially occuluded by smoke particles, so it was a net win for the artistic and aesthetic appeal of the project.
-
-### TO DO:
-
-* discuss what the related state-of-the-art techniques are
-and discuss how the methods used by your code or tools related to the state-of-the-art.
 
 ## Code
 
