@@ -13,7 +13,7 @@
 
 The physics for the particle system was done more or less the standard way we covered in class.
 We keep track of a particle's position and velocity and use a vector for acceleration
-that remains constant over time.
+that remains constant over time (this acts like a constant "wind" on the smoke).
 The rendering of the fire and smoke used a bunch of instanced spheres, with handtuned functions controlling the size and color of the particle.
 
 The size is computed by `min(sqrt(age * 0.08), age)`.
