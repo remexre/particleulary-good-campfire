@@ -1,4 +1,3 @@
-(* Based on: https://learnopengl.com/Getting-started/Camera *)
 type t = {
   (* camera *)
   mutable camera_pos : Vec3.t;
