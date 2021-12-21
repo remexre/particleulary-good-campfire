@@ -7,7 +7,7 @@
 
 ## Simulation: A particle-ulary good campfire
 
-<video controls width="400"><source src="https://cdn.remexre.xyz/files/a926fd22ba1da695671c6aa42e2838812736c9d6.mp4" type="video/mp4"></video>
+<video controls width="100%"><source src="https://cdn.remexre.xyz/files/a926fd22ba1da695671c6aa42e2838812736c9d6.mp4" type="video/mp4"></video>
 
 ## TO DO:
 
