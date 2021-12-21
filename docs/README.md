@@ -122,6 +122,7 @@ Roughly estimating (since we didn't go through the trouble of modifying the OCam
 
 As it turns out, our simulation was originally keeping particles alive until `t=500`; after lowering this to `t=4`, we're easily able to increase the rate of particle generation by a factor of 25-50 before dropping below the "console gaming is just as good as PC" line (30fps).
 At that point, however, the bottleneck appears to still be the CPU (tested on an Intel i7-6700K and a NVIDIA GeForce RTX 3080 Ti).
+Since the CPU is 8-thread and the problem is embarassingly parallel, a roughly 16-32x increase in the number of particles ought to be possible.
 
 ## TO DO:
 
