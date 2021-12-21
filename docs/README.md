@@ -16,8 +16,6 @@ The report should:
 to your approach? What would be the limiting factor to scaling up 10x or 100x bigger than what
 you turned in?
 * Address any of the specific questions outlined above for the project you choose
-* Summarize the feedback you got from your peers during the progress report and discussed in
-what ways (if any) you addressed this feedback for the final version.
 * Suggest some directions the project could be extended in the future. What are the limitations of
 your current versions and how might you get pass them if given more time?
 
@@ -29,8 +27,20 @@ Since we chose to do option 4 (i.e. implementing an animation technique we didn'
 implement in class, we also need to:
 
 * Explicitly discuss the connection between your topic and topics from the course
-* For one of the aspects of your demo, discuss what the related state-of-the-art techniques are
-and discuss how the methods used by your code or tools related to the state-of-the-art.
+
+## Feedback from our peers
+
+At the time we shared our work with our peers during the progress report, we did
+not yet have a working renderer so there was nothing visual to show off. Most 
+feedback included something to the effect of "Get something on the screen!",
+albeit put more kindly. We are happy to report we have succeed in addressing 
+this feedback by debugging our renderer and creating our campfire scene.
+
+A suggestion made by one of our peers was to try to make the campfire look as
+realistic as possible. Although we wanted to keep the scene cute and fun, we 
+attempted to add elements of realism through semi-accurate lighting, as well as
+fine-tuning our particle parameters and rendering different transparency levels,
+colors, and sizes for a given particle depending on its age.  
 
 ## Our work and the state of the art
 
@@ -50,7 +60,12 @@ and of approaches that use fluid dynamics for simulating fire and smoke. In this
 sense, we differ from both state-of-the-art and practical implementations: we
 do not use billboarding techniques as is often done in practice, and we also 
 chose to use a particle system unlike the state-of-the-art techniques that use
-fluid dynamics. 
+fluid dynamics.
+
+### TO DO:
+
+* discuss what the related state-of-the-art techniques are
+and discuss how the methods used by your code or tools related to the state-of-the-art.
 
 ## Code
 
