@@ -35,11 +35,11 @@ After that time, the particle is destroyed.
 Though this is relatively simple, it produces quite good effects, since the smoke is dense enough that smoke spheres are able to occlude fire spheres (despite depth-sorting), producing fairly organic fire shapes.
 
 Adjacent to the material covered in this course, it is of note that because we
-implemented this simulation from scratch in `OCaml`, we also implemented a great
+implemented this simulation from scratch in OCaml, we also implemented a great
 deal of the library code we used (i.e. all of the code from source in `/lib`,
 all the way from the asset and object file handling to the camera and mat4). 
 This of course was based on existing open-source libraries in other languages, 
-but porting these computations over to `OCaml` presented an additional fun 
+but porting these computations over to OCaml presented an additional fun 
 challenge.
 
 ### Computational bottlenecks
