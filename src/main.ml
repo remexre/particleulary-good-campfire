@@ -14,7 +14,7 @@ let main () : unit =
           let dir = (0.0, 0.025, 0.0) in
           Particle_system.apply_force_to_all_particles particle_system dir;
           Particle_system.animate particle_system dt;
-          Particle_system.add_particles particle_system 10;
+          Particle_system.add_particles particle_system 500;
           Particle_system.restore_lights particle_system;
 
           Render.render scene))

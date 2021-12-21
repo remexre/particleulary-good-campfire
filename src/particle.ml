@@ -39,4 +39,4 @@ let animate (p : t) (dt : float) = update p dt
 (*TO DO: render an individual t*)
 (*let render (p : t) =*)
 
-let alive (p : t) = p.age < 500.0
+let alive (p : t) = p.age < 4.0
